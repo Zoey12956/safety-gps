@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+
+<html class="w-full h-full overflow-hidden" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Safety-first GPS — Navigation Preview</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #DCE2E9;
+    -webkit-font-smoothing: antialiased;
+  }
+  .noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  svg text { font-family: inherit; }
+</style>
+</head>
+<body class="w-full h-full m-0 overflow-hidden flex items-center justify-center">
+<div class="w-full h-full max-w-[393px] max-h-[852px] bg-[#F4F6F9] flex flex-col overflow-hidden relative shadow-2xl">
+<header class="shrink-0 bg-[#0B1B34] px-4 pt-3 pb-3">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<a class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0" href="routes.html">
+<iconify-icon class="text-white text-[18px]" icon="mdi:arrow-left"></iconify-icon>
+</a>
+<div class="min-w-0">
+<p class="text-white text-[15px] font-bold leading-tight truncate">Navigating</p>
+<p class="text-[10px] text-slate-400 leading-tight truncate" id="hdrDest"></p>
+</div>
+</div>
+<span class="shrink-0 text-[9px] font-bold tracking-wide px-2 py-1 rounded-full bg-sky-400/15 text-sky-300 border border-sky-400/30">NAVIGATION PREVIEW</span>
+</div>
+</header>
+<main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden noscroll">
+<!-- Preview notice -->
+<section class="px-4 pt-3">
+<div class="rounded-2xl bg-sky-50 border border-sky-200 px-3 py-2.5">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[16px] text-sky-700 mt-0.5 shrink-0" icon="mdi:cellphone-information"></iconify-icon>
+<p class="text-[11px] text-sky-900 leading-relaxed"><strong class="font-bold">Navigation Preview.</strong> Live location, heading and turn-by-turn guidance need the routing connector, which is not configured in this build. Nothing below tracks your position, and no external map is opened automatically.</p>
+</div>
+</div>
+</section>
+<!-- Route summary -->
+<section class="px-4 mt-3">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3">
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Selected route</p>
+<p class="text-[13px] font-bold text-slate-900 mt-0.5" id="routeName"></p>
+</div>
+<span class="shrink-0 text-[9px] font-bold rounded-full px-2 py-1" id="routeTag"></span>
+</div>
+<div class="mt-3 grid grid-cols-3 gap-2">
+<div class="rounded-xl bg-slate-50 border border-slate-200 px-2 py-2 text-center">
+<p class="text-[16px] font-extrabold text-slate-900" id="statMin"></p>
+<p class="text-[9px] text-slate-400 font-bold">MINUTES</p>
+</div>
+<div class="rounded-xl bg-slate-50 border border-slate-200 px-2 py-2 text-center">
+<p class="text-[16px] font-extrabold text-slate-900" id="statKm"></p>
+<p class="text-[9px] text-slate-400 font-bold">KM WALK</p>
+</div>
+<div class="rounded-xl bg-slate-50 border border-slate-200 px-2 py-2 text-center">
+<p class="text-[16px] font-extrabold text-slate-900" id="statInc"></p>
+<p class="text-[9px] text-slate-400 font-bold">NEARBY REPORTS</p>
+</div>
+</div>
+<div class="mt-2 flex items-start gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#0B1B34] shrink-0 mt-1.5"></span>
+<p class="text-[11px] text-slate-600" id="tripFrom"></p>
+</div>
+<div class="ml-1 my-0.5 border-l-2 border-dotted border-slate-300 h-3"></div>
+<div class="flex items-start gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-[#059669] shrink-0 mt-1.5"></span>
+<p class="text-[11px] font-semibold text-slate-800" id="tripTo"></p>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed">Times and distances are schematic Demo Mode estimates, not live routing output.</p>
+</div>
+</section>
+<!-- Map -->
+<section class="px-4 mt-3">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="px-3 py-2 flex items-center justify-between border-b border-slate-100">
+<p class="text-[12px] font-bold text-slate-700">Route preview</p>
+<span class="text-[9px] text-slate-400">Schematic · not to scale</span>
+</div>
+<div class="relative">
+<div class="h-[240px] bg-[#E9EEF3]" id="mapWrap"></div>
+<span class="absolute top-2 left-2 text-[9px] font-bold bg-white/95 border border-sky-200 text-sky-700 rounded-full px-2 py-1">Location off — Preview</span>
+<button class="absolute top-2 right-2 flex items-center gap-1 bg-[#DC2626] text-white text-[11px] font-bold rounded-full px-3 py-2 shadow-lg" id="sosBtn">
+<iconify-icon class="text-[14px]" icon="mdi:alarm-light"></iconify-icon> SOS
+          </button>
+</div>
+</div>
+</section>
+<!-- Steps -->
+<section class="px-4 mt-4">
+<div class="flex items-center justify-between gap-2 mb-2">
+<h2 class="text-[14px] font-bold text-slate-900">Route steps</h2>
+<span class="text-[9px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded-full px-2 py-1">PREVIEW ONLY</span>
+</div>
+<div class="rounded-2xl bg-white border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden" id="steps"></div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed px-1">Steps describe the planned corridor. They are not live guidance and will not update as you move.</p>
+</section>
+<!-- External app note -->
+<section class="px-4 mt-4">
+<div class="rounded-2xl bg-white border border-slate-200 p-3">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[16px] text-slate-400 mt-0.5 shrink-0" icon="mdi:open-in-new"></iconify-icon>
+<p class="text-[11px] text-slate-600 leading-relaxed"><strong class="font-bold text-slate-800">External map apps.</strong> If this trip is handed off to an external navigation app, that app may re-plan the route and may not preserve the safety-based detour. This prototype does not hand off automatically.</p>
+</div>
+</div>
+</section>
+<!-- Safety details -->
+<section class="px-4 mt-3">
+<button class="w-full flex items-center justify-center gap-2 border border-slate-300 bg-white text-slate-800 text-[13px] font-bold rounded-xl py-3" id="whyBtn">
+<iconify-icon class="text-[17px] text-[#047857]" icon="mdi:help-circle-outline"></iconify-icon>
+        Why this route?
+      </button>
+</section>
+<!-- Disclaimer -->
+<section class="px-4 mt-4 pb-4">
+<div class="rounded-2xl bg-[#0B1B34] px-4 py-3">
+<p class="text-[11px] text-slate-300 leading-relaxed">Based on available reports and public data. Coverage may be incomplete or outdated. A recommended route does not guarantee safety.</p>
+</div>
+</section>
+</main>
+<!-- Emergency bar -->
+<div class="shrink-0 bg-white border-t border-slate-200 px-3 py-2.5 flex items-center gap-2">
+<button class="flex-1 flex items-center justify-center gap-1.5 border border-slate-300 text-slate-700 text-[13px] font-bold rounded-xl py-3" id="endBtn">
+<iconify-icon class="text-[16px]" icon="mdi:close-circle-outline"></iconify-icon>
+      End
+    </button>
+<button class="flex-[1.4] flex items-center justify-center gap-1.5 bg-[#DC2626] text-white text-[13px] font-bold rounded-xl py-3" id="sosBtn2">
+<iconify-icon class="text-[17px]" icon="mdi:alarm-light"></iconify-icon>
+      SOS / Emergency
+    </button>
+</div>
+<!-- Why modal -->
+<div class="absolute inset-0 z-40 bg-slate-900/50 p-4 flex items-end" id="whyModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden max-h-[90%] flex flex-col">
+<div class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-start justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold text-[#047857] uppercase tracking-wide">Safety details</p>
+<h3 class="text-[14px] font-bold text-slate-900 mt-1">Why this route?</h3>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="whyClose">
+<iconify-icon class="text-[18px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="px-4 py-3 overflow-y-auto noscroll" id="whyBody"></div>
+</div>
+</div>
+<!-- SOS modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/60 p-4 flex items-end" id="sosModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden">
+<div class="bg-[#DC2626] px-4 py-3">
+<p class="text-white text-[15px] font-bold">Emergency</p>
+<p class="text-red-100 text-[11px] mt-0.5">Choose who you want to contact. You will be asked to confirm before anything happens.</p>
+</div>
+<div class="p-4 space-y-2">
+<button class="w-full flex items-center gap-3 border border-slate-200 rounded-xl px-3 py-3 text-left" data-sos="police">
+<span class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+<iconify-icon class="text-[18px] text-[#DC2626]" icon="mdi:police-badge"></iconify-icon>
+</span>
+<span class="min-w-0">
+<span class="block text-[13px] font-bold text-slate-900">Call Police / Emergency Services</span>
+<span class="block text-[11px] text-slate-500">Singapore emergency line · 999</span>
+</span>
+</button>
+<button class="w-full flex items-center gap-3 border border-slate-200 rounded-xl px-3 py-3 text-left" data-sos="contact">
+<span class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+<iconify-icon class="text-[18px] text-[#047857]" icon="mdi:account-heart"></iconify-icon>
+</span>
+<span class="min-w-0">
+<span class="block text-[13px] font-bold text-slate-900">Call a Trusted Contact</span>
+<span class="block text-[11px] text-slate-500" id="contactSub"></span>
+</span>
+</button>
+<p class="text-[10px] text-slate-400 leading-relaxed px-1">Your trusted contact is stored locally for this prototype and is not sent anywhere.</p>
+<button class="w-full text-[13px] font-semibold text-slate-500 py-2" id="sosCancel">Cancel</button>
+</div>
+</div>
+</div>
+<!-- Confirm modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/70 p-4 flex items-center" id="confirmModal" style="display:none">
+<div class="w-full bg-white rounded-2xl p-4">
+<h3 class="text-[14px] font-bold text-slate-900" id="cfTitle"></h3>
+<p class="text-[12px] text-slate-500 mt-2 leading-relaxed" id="cfBody"></p>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 text-[13px] font-semibold text-slate-600 border border-slate-200 rounded-xl py-2.5" id="cfCancel">Cancel</button>
+<button class="flex-1 text-[13px] font-bold text-white bg-[#DC2626] rounded-xl py-2.5" id="cfOk">Confirm</button>
+</div>
+</div>
+</div>
+<!-- Prototype notice -->
+<div class="absolute inset-0 z-50 bg-slate-900/70 p-4 flex items-center" id="noticeModal" style="display:none">
+<div class="w-full bg-white rounded-2xl p-4">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[18px] text-slate-400 mt-0.5 shrink-0" icon="mdi:information-outline"></iconify-icon>
+<div>
+<h3 class="text-[13px] font-bold text-slate-900">Prototype notice</h3>
+<p class="text-[12px] text-slate-600 mt-1 leading-relaxed" id="noticeBody"></p>
+</div>
+</div>
+<button class="w-full mt-3 text-[13px] font-bold text-white bg-[#0B1B34] rounded-xl py-2.5" id="noticeOk">Close</button>
+</div>
+</div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var DEMOS = {
+    d1: {
+      id: 'd1', from: 'Bugis MRT Station', shortFrom: 'Bugis MRT', to: 'Singapore Management University', shortTo: 'SMU', area: 'Bugis / Bras Basah',
+      fromPt: [320, 390], toPt: [680, 110],
+      hRoads: [{ y: 110, name: 'Bugis Street' }, { y: 250, name: 'North Bridge Road' }, { y: 390, name: 'Victoria Street' }, { y: 530, name: 'Beach Road' }],
+      vRoads: [{ x: 320, name: 'Ophir Road' }, { x: 500, name: 'Middle Road' }, { x: 680, name: 'Bras Basah Road' }, { x: 860, name: 'Prinsep Street' }],
+      pois: [{ x: 390, y: 180, name: 'Bugis Junction' }, { x: 760, y: 440, name: 'National Library' }],
+      fastest: { pts: [[320, 390], [680, 390], [680, 110]], km: '1.0', min: 13, streets: ['Victoria Street', 'Bras Basah Road'], reason: 'Most direct footway — straight along Victoria Street, then north along Bras Basah Road.' },
+      safer: { pts: [[320, 390], [320, 250], [860, 250], [860, 110], [680, 110]], km: '1.3', min: 17, streets: ['Ophir Road', 'North Bridge Road', 'Prinsep Street'], reason: 'Avoids two recorded incident locations on Victoria Street and the southern stretch of Bras Basah Road, and uses signalised crossings at North Bridge Road and Prinsep Street.', extraMin: '+4 min', extraKm: '+0.3 km' },
+      insufficient: false
+    },
+    d2: {
+      id: 'd2', from: 'Orchard MRT Station', shortFrom: 'Orchard MRT', to: 'Fort Canning Park', shortTo: 'Fort Canning Park', area: 'Orchard / Fort Canning',
+      fromPt: [140, 110], toPt: [680, 530],
+      hRoads: [{ y: 110, name: 'Orchard Road' }, { y: 250, name: 'Penang Road' }, { y: 390, name: 'Killiney Road' }, { y: 530, name: 'Fort Canning Road' }],
+      vRoads: [{ x: 320, name: 'Clemenceau Avenue' }, { x: 500, name: 'Penang Lane' }, { x: 680, name: 'Fort Canning Link' }, { x: 860, name: 'River Valley Road' }],
+      pois: [{ x: 390, y: 180, name: 'Somerset MRT' }, { x: 760, y: 440, name: 'Fort Canning Centre' }],
+      fastest: { pts: [[140, 110], [500, 110], [500, 530], [680, 530]], km: '1.4', min: 18, streets: ['Orchard Road', 'Penang Lane', 'Fort Canning Road'], reason: 'Shortest distance — Orchard Road, then Penang Lane down to Fort Canning Road.' },
+      safer: { pts: [[140, 110], [320, 110], [320, 250], [860, 250], [860, 530], [680, 530]], km: '1.7', min: 22, streets: ['Clemenceau Avenue', 'Penang Road', 'River Valley Road'], reason: 'Avoids the two road segments where incidents were recorded, and stays on wider, lit footways via Penang Road and River Valley Road.', extraMin: '+4 min', extraKm: '+0.3 km' },
+      insufficient: false
+    },
+    d3: {
+      id: 'd3', from: 'Tampines MRT Station', shortFrom: 'Tampines MRT', to: 'Our Tampines Hub', shortTo: 'Our Tampines Hub', area: 'Tampines',
+      fromPt: [320, 110], toPt: [680, 530],
+      hRoads: [{ y: 110, name: 'Tampines Central 1' }, { y: 250, name: 'Tampines Avenue 5' }, { y: 390, name: 'Tampines Avenue 4' }, { y: 530, name: 'Tampines Avenue 7' }],
+      vRoads: [{ x: 320, name: 'Tampines Central 5' }, { x: 500, name: 'Tampines Mall Link' }, { x: 680, name: 'Tampines Avenue 2' }, { x: 860, name: 'Tampines Avenue 9' }],
+      pois: [{ x: 390, y: 180, name: 'Tampines Mall' }, { x: 760, y: 440, name: 'Tampines Polyclinic' }],
+      fastest: { pts: [[320, 110], [320, 390], [680, 390], [680, 530]], km: '1.1', min: 14, streets: ['Tampines Central 5', 'Tampines Avenue 4', 'Tampines Avenue 2'], reason: 'Most direct — south on Tampines Central 5, then east along Tampines Avenue 4.' },
+      safer: { pts: [[320, 110], [860, 110], [860, 530], [680, 530]], km: '1.5', min: 19, streets: ['Tampines Central 1', 'Tampines Avenue 9', 'Tampines Avenue 7'], reason: 'Avoids two recorded incident locations and uses the covered walkway along Tampines Central 1 and Tampines Avenue 9, with more open sightlines after dark.', extraMin: '+5 min', extraKm: '+0.4 km' },
+      insufficient: false
+    },
+    d4: {
+      id: 'd4', from: 'Jurong East MRT Station', shortFrom: 'Jurong East MRT', to: 'Jurong Lake Gardens', shortTo: 'Jurong Lake Gardens', area: 'Jurong East',
+      fromPt: [320, 110], toPt: [860, 530],
+      hRoads: [{ y: 110, name: 'Jurong Gateway Road' }, { y: 250, name: 'Boon Lay Way' }, { y: 390, name: 'Jurong Town Hall Road' }, { y: 530, name: 'Lakeside Drive' }],
+      vRoads: [{ x: 320, name: 'Jem Link' }, { x: 500, name: 'Gateway Link' }, { x: 680, name: 'Jurong East Street 13' }, { x: 860, name: 'Corporation Road' }],
+      pois: [{ x: 390, y: 180, name: 'JEM' }, { x: 760, y: 440, name: 'Lakeside MRT' }],
+      fastest: { pts: [[320, 110], [680, 110], [680, 530], [860, 530]], km: '1.6', min: 20, streets: ['Jurong Gateway Road', 'Jurong East Street 13', 'Lakeside Drive'], reason: 'Direct route via Jurong Gateway Road and Jurong East Street 13.' },
+      safer: null,
+      insufficient: true
+    }
+  };
+
+  var NEWS = [
+    { id: 'n1', type: 'Snatch theft', title: 'Snatch theft reported near Victoria Street', area: 'Bugis', incidentDate: '14 Aug 2024', source: 'Singapore Police Force', demo: 'd1' },
+    { id: 'n2', type: 'Robbery', title: 'Robbery reported along Bras Basah Road', area: 'Bras Basah', incidentDate: '02 Nov 2023', source: 'The Straits Times', demo: 'd1' },
+    { id: 'n3', type: 'Robbery', title: 'Robbery at an Orchard Road retail unit', area: 'Orchard', incidentDate: '21 Jul 2024', source: 'CNA', demo: 'd2' },
+    { id: 'n4', type: 'Snatch theft', title: 'Snatch theft along Penang Lane', area: 'Dhoby Ghaut', incidentDate: '09 Mar 2024', source: 'Singapore Police Force', demo: 'd2' },
+    { id: 'n5', type: 'Assault', title: 'Assault following a dispute near Tampines Avenue 5', area: 'Tampines', incidentDate: '18 Jun 2024', source: 'CNA', demo: 'd3' },
+    { id: 'n6', type: 'Outrage of modesty', title: 'Outrage of modesty reported at Tampines Avenue 4', area: 'Tampines', incidentDate: '27 Sep 2024', source: 'The Straits Times', demo: 'd3' }
+  ];
+
+  var DATA_UPDATED = '11 Oct 2026, 09:20 SGT';
+  var CONTACT = { name: 'Aisha Rahman', phone: '+65 9123 4567' };
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(el, d) { if (el) el.style.display = d || 'block'; }
+  function hide(el) { if (el) el.style.display = 'none'; }
+
+  var demoId = 'd1';
+  var routeKind = 'safer';
+
+  try {
+    var sd = localStorage.getItem('sfgps_demo');
+    if (sd && DEMOS[sd]) demoId = sd;
+    var sr = localStorage.getItem('sfgps_route');
+    if (sr === 'fastest' || sr === 'safer') routeKind = sr;
+  } catch (e) {}
+
+  if (!DEMOS[demoId].safer) routeKind = 'fastest';
+
+  var demo = DEMOS[demoId];
+  var route = demo[routeKind] || demo.fastest;
+
+  /* ---------------- Map ---------------- */
+
+  function ptsToPath(pts) {
+    return 'M ' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join(' L ');
+  }
+
+  function buildMap(d, route) {
+    var s = '';
+    var color = routeKind === 'safer' ? '#059669' : '#F59E0B';
+    s += '<svg viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" class="w-full h-full block">';
+    s += '<rect x="0" y="0" width="1000" height="640" fill="#E9EEF3"/>';
+    s += '<rect x="160" y="130" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="520" y="430" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="160" y="410" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="520" y="270" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="700" y="130" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<path d="M 0 596 C 220 566, 420 622, 640 588 C 780 566, 900 588, 1000 570 L 1000 640 L 0 640 Z" fill="#CFE4F2"/>';
+    d.hRoads.forEach(function (r) {
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+    d.vRoads.forEach(function (r) {
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+    d.hRoads.forEach(function (r) {
+      s += '<text x="46" y="' + (r.y - 17) + '" font-size="16" font-weight="600" fill="#93A0AE">' + r.name + '</text>';
+    });
+    d.vRoads.forEach(function (r) {
+      s += '<text x="' + r.x + '" y="46" font-size="16" font-weight="600" fill="#93A0AE" text-anchor="middle">' + r.name + '</text>';
+    });
+    d.pois.forEach(function (p) {
+      s += '<circle cx="' + p.x + '" cy="' + p.y + '" r="7" fill="#FFFFFF" stroke="#9AA7B4" stroke-width="3"/>';
+      s += '<text x="' + (p.x + 14) + '" y="' + (p.y + 6) + '" font-size="16" font-weight="600" fill="#7E8B99">' + p.name + '</text>';
+    });
+    s += '<path d="' + ptsToPath(route.pts) + '" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>';
+    s += '<path d="' + ptsToPath(route.pts) + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>';
+    s += '<circle cx="' + d.fromPt[0] + '" cy="' + d.fromPt[1] + '" r="12" fill="#0B1B34" stroke="#FFFFFF" stroke-width="5"/>';
+    s += '<circle cx="' + d.toPt[0] + '" cy="' + d.toPt[1] + '" r="12" fill="#059669" stroke="#FFFFFF" stroke-width="5"/>';
+    s += '</svg>';
+    return s;
+  }
+
+  /* ---------------- Steps ---------------- */
+
+  function bearing(a, b) {
+    var dx = b[0] - a[0], dy = b[1] - a[1];
+    if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'east' : 'west';
+    return dy > 0 ? 'south' : 'north';
+  }
+
+  function turnLabel(a, b, c) {
+    var v1x = b[0] - a[0], v1y = b[1] - a[1];
+    var v2x = c[0] - b[0], v2y = c[1] - b[1];
+    var cross = v1x * v2y - v1y * v2x;
+    if (cross > 0) return 'Turn right';
+    if (cross < 0) return 'Turn left';
+    return 'Continue';
+  }
+
+  function renderSteps() {
+    var pts = route.pts;
+    var units = 0;
+    var segLens = [];
+    for (var i = 0; i < pts.length - 1; i++) {
+      var dx = pts[i + 1][0] - pts[i][0];
+      var dy = pts[i + 1][1] - pts[i][1];
+      var len = Math.sqrt(dx * dx + dy * dy);
+      segLens.push(len);
+      units += len;
+    }
+    var totalMeters = parseFloat(route.km) * 1000;
+    var html = '';
+    var streets = route.streets;
+
+    for (var j = 0; j < segLens.length; j++) {
+      var meters = Math.round(totalMeters * segLens[j] / units / 10) * 10;
+      var street = streets[j % streets.length];
+      var title;
+      if (j === 0) {
+        title = 'Head ' + bearing(pts[0], pts[1]) + ' along ' + street;
+      } else {
+        title = turnLabel(pts[j - 1], pts[j], pts[j + 1]) + ' onto ' + street;
+      }
+      html += '<div class="px-3 py-2.5 flex items-start gap-2.5">';
+      html += '<span class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">';
+      html += '<iconify-icon icon="' + (j === 0 ? 'mdi:arrow-up' : 'mdi:arrow-u-right-top') + '" class="text-[15px] text-slate-600"></iconify-icon></span>';
+      html += '<div class="min-w-0 flex-1">';
+      html += '<p class="text-[12px] font-semibold text-slate-800 leading-snug">' + title + '</p>';
+      html += '<p class="text-[10px] text-slate-400 mt-0.5">approx. ' + meters + ' m · follow the footway, not the road centre</p>';
+      html += '</div></div>';
+    }
+    html += '<div class="px-3 py-2.5 flex items-start gap-2.5 bg-emerald-50">';
+    html += '<span class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">';
+    html += '<iconify-icon icon="mdi:flag-checkered" class="text-[15px] text-[#047857]"></iconify-icon></span>';
+    html += '<div><p class="text-[12px] font-bold text-[#047857]">Arrive at ' + demo.to + '</p>';
+    html += '<p class="text-[10px] text-emerald-700 mt-0.5">Destination reached at the end of this corridor</p></div></div>';
+
+    $('steps').innerHTML = html;
+  }
+
+  /* ---------------- Summary ---------------- */
+
+  function renderSummary() {
+    var isFast = routeKind === 'fastest';
+    $('hdrDest').textContent = 'to ' + demo.to;
+    $('routeName').textContent = demo.from + ' → ' + demo.to;
+    $('routeTag').textContent = isFast ? 'FASTEST ROUTE' : 'RECOMMENDED SAFER ROUTE';
+    $('routeTag').className = 'shrink-0 text-[9px] font-bold rounded-full px-2 py-1 ' +
+      (isFast ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800');
+
+    $('statMin').textContent = route.min;
+    $('statKm').textContent = route.km;
+    var n = NEWS.filter(function (x) { return x.demo === demoId; }).length;
+    $('statInc').textContent = n;
+    $('tripFrom').textContent = demo.from;
+    $('tripTo').textContent = demo.to;
+  }
+
+  function renderWhy() {
+    var incs = NEWS.filter(function (x) { return x.demo === demoId; });
+    var html = '';
+    if (demo.insufficient) {
+      html += '<div class="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">';
+      html += '<p class="text-[12px] font-bold text-amber-900">Insufficient data to compare route safety</p>';
+      html += '<p class="text-[11px] text-amber-800 mt-1 leading-relaxed">No alternative route could be recommended for this trip, so you are previewing the fastest route alone.</p>';
+      html += '</div>';
+    } else {
+      html += '<p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">' + (routeKind === 'safer' ? 'Recommended because' : 'This is the fastest option') + '</p>';
+      html += '<p class="text-[12px] text-slate-700 mt-1 leading-relaxed">' + route.reason + '</p>';
+      html += '<div class="mt-3 grid grid-cols-3 gap-2">';
+      html += '<div class="rounded-xl bg-slate-50 border border-slate-200 px-2 py-2 text-center"><p class="text-[15px] font-extrabold text-slate-900">' + route.min + '</p><p class="text-[9px] text-slate-400 font-semibold">MINUTES</p></div>';
+      html += '<div class="rounded-xl bg-slate-50 border border-slate-200 px-2 py-2 text-center"><p class="text-[15px] font-extrabold text-slate-900">' + route.km + '</p><p class="text-[9px] text-slate-400 font-semibold">KM WALK</p></div>';
+      html += '<div class="rounded-xl bg-emerald-50 border border-emerald-100 px-2 py-2 text-center"><p class="text-[15px] font-extrabold text-[#047857]">' + (routeKind === 'safer' ? (route.extraMin || '—') : '0') + '</p><p class="text-[9px] text-emerald-700 font-semibold">ADDED TIME</p></div>';
+      html += '</div>';
+    }
+
+    html += '<p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide mt-4">Evidence used</p>';
+    if (!incs.length) {
+      html += '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed">No location-linked reports were found near this trip. Absence of reports is not evidence of safety.</p>';
+    } else {
+      html += '<div class="mt-2 space-y-2">';
+      incs.forEach(function (m) {
+        html += '<div class="rounded-xl border border-slate-200 px-3 py-2">';
+        html += '<div class="flex items-start justify-between gap-2">';
+        html += '<p class="text-[11px] font-bold text-slate-800 leading-snug">' + m.title + '</p>';
+        html += '<span class="shrink-0 text-[9px] font-bold rounded-full px-2 py-0.5 bg-red-50 text-red-700 border border-red-100">' + m.type + '</span>';
+        html += '</div>';
+        html += '<p class="text-[10px] text-slate-400 mt-1">' + m.incidentDate + ' · ' + m.area + ' · ' + m.source + ' · Approximate location · Sample content</p>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2">';
+    html += '<p class="text-[10px] text-slate-500">Data last updated: <span class="font-semibold text-slate-700">' + DATA_UPDATED + '</span></p>';
+    html += '<p class="text-[10px] text-slate-500 mt-1">Added cost versus fastest: ' + (routeKind === 'safer' ? (route.extraMin || '') + ' · ' + (route.extraKm || '') : 'none — this is the fastest route') + '</p>';
+    html += '</div>';
+
+    html += '<div class="mt-3 rounded-xl bg-[#0B1B34] px-3 py-2.5">';
+    html += '<p class="text-[11px] text-slate-300 leading-relaxed">Based on available reports and public data. Coverage may be incomplete or outdated. A recommended route does not guarantee safety.</p>';
+    html += '</div>';
+
+    $('whyBody').innerHTML = html;
+    show($('whyModal'), 'flex');
+  }
+
+  /* ---------------- SOS ---------------- */
+
+  var pending = null;
+
+  function askConfirm(kind) {
+    pending = kind;
+    if (kind === 'police') {
+      $('cfTitle').textContent = 'Call Police / Emergency Services?';
+      $('cfBody').textContent = 'This will attempt to dial 999 (Singapore emergency line). Only continue if you need urgent help.';
+    } else {
+      $('cfTitle').textContent = 'Call ' + CONTACT.name + '?';
+      $('cfBody').textContent = 'This will attempt to dial ' + CONTACT.phone + '. They are set as your trusted contact for this prototype.';
+    }
+    hide($('sosModal'));
+    show($('confirmModal'), 'flex');
+  }
+
+  function doCall() {
+    var kind = pending;
+    pending = null;
+    hide($('confirmModal'));
+    $('noticeBody').textContent = kind === 'police'
+      ? 'Dialling is not available in this preview. On a real device this action would open the phone dialler with 999. No call was placed and no emergency service was contacted.'
+      : 'Dialling is not available in this preview. On a real device this action would open the phone dialler with ' + CONTACT.phone + '. No call was placed.';
+    show($('noticeModal'), 'flex');
+  }
+
+  /* ---------------- Bind ---------------- */
+
+  $('mapWrap').innerHTML = buildMap(demo, route);
+  renderSummary();
+  renderSteps();
+  $('contactSub').textContent = CONTACT.name + ' · ' + CONTACT.phone;
+
+  $('sosBtn').addEventListener('click', function () { show($('sosModal'), 'flex'); });
+  $('sosBtn2').addEventListener('click', function () { show($('sosModal'), 'flex'); });
+  $('sosCancel').addEventListener('click', function () { hide($('sosModal')); });
+  $('sosModal').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sos]');
+    if (b) askConfirm(b.getAttribute('data-sos'));
+    else if (e.target === $('sosModal')) hide($('sosModal'));
+  });
+  $('cfCancel').addEventListener('click', function () { hide($('confirmModal')); pending = null; });
+  $('cfOk').addEventListener('click', doCall);
+  $('noticeOk').addEventListener('click', function () { hide($('noticeModal')); });
+  $('whyBtn').addEventListener('click', renderWhy);
+  $('whyClose').addEventListener('click', function () { hide($('whyModal')); });
+  $('whyModal').addEventListener('click', function (e) { if (e.target === $('whyModal')) hide($('whyModal')); });
+  $('endBtn').addEventListener('click', function () { window.location.href = 'routes.html'; });
+
+})();
+</script>
+</body>
+</html>

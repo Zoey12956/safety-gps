@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="w-full h-full overflow-hidden" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Safety-first GPS — Safety Data</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #DCE2E9;
+    -webkit-font-smoothing: antialiased;
+  }
+  .noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .noscroll::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body class="w-full h-full m-0 overflow-hidden flex items-center justify-center">
+<div class="w-full h-full max-w-[393px] max-h-[852px] bg-[#F4F6F9] flex flex-col overflow-hidden relative shadow-2xl">
+<header class="shrink-0 bg-[#0B1B34] px-4 pt-3 pb-3">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-9 h-9 rounded-xl bg-[#059669] flex items-center justify-center shrink-0">
+<iconify-icon class="text-white text-[19px]" icon="mdi:database-eye-outline"></iconify-icon>
+</div>
+<div class="min-w-0">
+<p class="text-white text-[15px] font-bold leading-tight truncate">Safety Data</p>
+<p class="text-[10px] text-slate-400 leading-tight truncate">What powers the recommendations</p>
+</div>
+</div>
+<span class="shrink-0 text-[9px] font-bold tracking-wide px-2 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">DEMO MODE</span>
+</div>
+</header>
+<main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden noscroll">
+<!-- Build identity -->
+<section class="px-4 pt-4">
+<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-4">
+<div class="flex items-start justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">A/B test variant</p>
+<h1 class="text-[16px] font-bold text-slate-900 mt-1">News / Data group</h1>
+</div>
+<span class="shrink-0 text-[9px] font-bold rounded-full px-2 py-1 bg-violet-50 text-violet-700 border border-violet-100">SAMPLE DATA</span>
+</div>
+<p class="text-[11px] text-slate-600 mt-2 leading-relaxed">Safety evidence in this variant comes only from news reporting and public safety datasets. It deliberately excludes user reviews, ratings and user-submitted reports, which are the evidence source for the comparison variant.</p>
+<div class="mt-3 grid grid-cols-2 gap-2">
+<div class="rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2">
+<p class="text-[10px] font-bold text-emerald-800">Included</p>
+<p class="text-[10px] text-emerald-700 mt-1 leading-relaxed">Police news releases, public incident datasets, published news reports</p>
+</div>
+<div class="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2">
+<p class="text-[10px] font-bold text-slate-600">Not included</p>
+<p class="text-[10px] text-slate-500 mt-1 leading-relaxed">User reviews, star ratings, user-reported incidents, crowd votes</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Sources -->
+<section class="px-4 mt-4">
+<h2 class="text-[14px] font-bold text-slate-900 mb-2">Data sources</h2>
+<div class="rounded-2xl bg-white border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden" id="sources"></div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed px-1">No source is connected in this build. Nothing on the map or in the news list is retrieved live.</p>
+</section>
+<!-- Pending configuration -->
+<section class="px-4 mt-4">
+<h2 class="text-[14px] font-bold text-slate-900 mb-2">Pending configuration</h2>
+<div class="rounded-2xl bg-white border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden" id="pending"></div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed px-1">Every item below needs a credential or an integration decision before this prototype can produce real routes, real news or real locations. No key is embedded in this build.</p>
+</section>
+<!-- Coverage gaps -->
+<section class="px-4 mt-4">
+<h2 class="text-[14px] font-bold text-slate-900 mb-2">Known coverage gaps</h2>
+<div class="space-y-2">
+<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-start gap-2">
+<iconify-icon class="text-[17px] text-amber-500 mt-0.5 shrink-0" icon="mdi:map-marker-question-outline"></iconify-icon>
+<p class="text-[11px] text-slate-600 leading-relaxed"><strong class="font-bold text-slate-800">Locations are approximate.</strong> Reports are usually tied to a road or an estate rather than a precise point, so markers show an area and never a block or unit number.</p>
+</div>
+<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-start gap-2">
+<iconify-icon class="text-[17px] text-slate-400 mt-0.5 shrink-0" icon="mdi:history"></iconify-icon>
+<p class="text-[11px] text-slate-600 leading-relaxed"><strong class="font-bold text-slate-800">Reports are historical.</strong> A past incident is not a warning about today, and a single record does not describe the character of a whole neighbourhood.</p>
+</div>
+<div class="rounded-2xl bg-white border border-slate-200 p-3 flex items-start gap-2">
+<iconify-icon class="text-[17px] text-slate-400 mt-0.5 shrink-0" icon="mdi:chart-line-variant"></iconify-icon>
+<p class="text-[11px] text-slate-600 leading-relaxed"><strong class="font-bold text-slate-800">Under-reporting is expected.</strong> Many incidents are never reported or published, so low counts can reflect reporting behaviour rather than a genuinely lower risk.</p>
+</div>
+<div class="rounded-2xl bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
+<iconify-icon class="text-[17px] text-amber-600 mt-0.5 shrink-0" icon="mdi:alert-outline"></iconify-icon>
+<p class="text-[11px] text-amber-900 leading-relaxed"><strong class="font-bold">No reports does not mean the route is safe.</strong> When the evidence base for a comparison is too thin, the app shows <em>Insufficient data to compare route safety</em> and makes no recommendation.</p>
+</div>
+</div>
+</section>
+<!-- Freshness -->
+<section class="px-4 mt-4">
+<h2 class="text-[14px] font-bold text-slate-900 mb-2">Data freshness</h2>
+<div class="rounded-2xl bg-white border border-slate-200 shadow-sm divide-y divide-slate-100 overflow-hidden">
+<div class="flex items-center justify-between gap-3 px-3 py-2.5">
+<span class="text-[11px] text-slate-500">Prototype build</span>
+<span class="text-[11px] font-semibold text-slate-800">11 Oct 2026</span>
+</div>
+<div class="flex items-center justify-between gap-3 px-3 py-2.5">
+<span class="text-[11px] text-slate-500">Evidence snapshot shown</span>
+<span class="text-[11px] font-semibold text-slate-800">11 Oct 2026, 09:20 SGT</span>
+</div>
+<div class="flex items-center justify-between gap-3 px-3 py-2.5">
+<span class="text-[11px] text-slate-500">Live source sync</span>
+<span class="text-[11px] font-semibold text-[#B45309]">Not configured</span>
+</div>
+<div class="flex items-center justify-between gap-3 px-3 py-2.5">
+<span class="text-[11px] text-slate-500">Auto refresh</span>
+<span class="text-[11px] font-semibold text-slate-500">Off</span>
+</div>
+</div>
+</section>
+<!-- A/B note -->
+<section class="px-4 mt-4">
+<div class="rounded-2xl bg-white border border-slate-200 p-3">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[17px] text-slate-500 mt-0.5 shrink-0" icon="mdi:ab-testing"></iconify-icon>
+<p class="text-[11px] text-slate-600 leading-relaxed"><strong class="font-bold text-slate-800">A/B test consistency.</strong> Layout, the four origin–destination tasks, the two candidate routes, the button set and the SOS flow are identical to the user-report variant. The only difference is where the safety evidence comes from and how it is presented.</p>
+</div>
+</div>
+</section>
+<!-- Disclaimer -->
+<section class="px-4 mt-4 pb-6">
+<div class="rounded-2xl bg-[#0B1B34] px-4 py-3">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[16px] text-slate-400 mt-0.5 shrink-0" icon="mdi:information-outline"></iconify-icon>
+<p class="text-[11px] text-slate-300 leading-relaxed">Based on available reports and public data. Coverage may be incomplete or outdated. A recommended route does not guarantee safety.</p>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed">This app does not predict crime and does not score the safety of an area or a person.</p>
+</div>
+</section>
+</main>
+<nav class="shrink-0 bg-white border-t border-slate-200 px-1 pt-1 pb-1.5">
+<div class="grid grid-cols-4">
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="home.html">
+<iconify-icon class="text-[21px]" icon="mdi:map-marker-radius"></iconify-icon>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="routes.html">
+<iconify-icon class="text-[21px]" icon="mdi:routes"></iconify-icon>
+<span class="text-[10px] font-medium">Routes</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[#047857]" href="safety-data.html">
+<iconify-icon class="text-[21px]" icon="mdi:database-eye-outline"></iconify-icon>
+<span class="text-[10px] font-bold">Safety Data</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="news.html">
+<iconify-icon class="text-[21px]" icon="mdi:newspaper-variant-outline"></iconify-icon>
+<span class="text-[10px] font-medium">Safety News</span>
+</a>
+</div>
+</nav>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var SOURCES = [
+    { name: 'Singapore Police Force — news releases', role: 'Robbery, snatch theft, assault and outrage of modesty reports by area', status: 'Not configured', icon: 'mdi:police-badge-outline' },
+    { name: 'CNA — Singapore news', role: 'Incident reporting with location context for walkable areas', status: 'Not configured', icon: 'mdi:newspaper-outline' },
+    { name: 'The Straits Times — Singapore', role: 'Court and police reporting used to cross-check incident type and date', status: 'Not configured', icon: 'mdi:file-document-outline' },
+    { name: 'data.gov.sg public datasets', role: 'Estate-level reference data for coverage checks', status: 'Not configured', icon: 'mdi:database-outline' },
+    { name: 'Onemap (Singapore Land Authority)', role: 'Address and place search for Singapore locations', status: 'Not configured', icon: 'mdi:map-search-outline' },
+    { name: 'Walking routing engine', role: 'Pedestrian route geometry that follows passable footways', status: 'Not configured', icon: 'mdi:walk' }
+  ];
+
+  var PENDING = [
+    { name: 'Onemap API credentials', detail: 'Registration and access key for place and address search in Singapore.', tag: 'API key' },
+    { name: 'Routing engine key + walking profile', detail: 'Server-side key and a pedestrian profile so candidate routes follow real footways instead of straight lines.', tag: 'API key' },
+    { name: 'SPF newsroom feed connector', detail: 'RSS or API access to Singapore Police Force news releases, plus a licence review.', tag: 'Connector' },
+    { name: 'CNA / The Straits Times content feed', detail: 'Licensed feed with a permitted caching window and attribution rules.', tag: 'Licence' },
+    { name: 'Location extraction pipeline', detail: 'Turns a report into a road or estate, and flags whether the location is approximate.', tag: 'Pipeline' },
+    { name: 'Map tile rendering provider', detail: 'Tile provider and key for rendering the base map inside the app.', tag: 'API key' },
+    { name: 'Geofence radius per corridor', detail: 'Decide the distance at which a report counts as "near a route" before a recommendation is made.', tag: 'Decision' },
+    { name: 'Minimum evidence threshold', detail: 'Define when the app must show "Insufficient data to compare route safety" instead of recommending.', tag: 'Decision' }
+  ];
+
+  function statusPill(status) {
+    return '<span class="shrink-0 text-[9px] font-bold rounded-full px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200">' + status + '</span>';
+  }
+
+  var sHtml = '';
+  SOURCES.forEach(function (s) {
+    sHtml += '<div class="px-3 py-3 flex items-start gap-2.5">';
+    sHtml += '<span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">';
+    sHtml += '<iconify-icon icon="' + s.icon + '" class="text-[16px] text-slate-500"></iconify-icon></span>';
+    sHtml += '<div class="min-w-0 flex-1">';
+    sHtml += '<div class="flex items-start justify-between gap-2">';
+    sHtml += '<p class="text-[11px] font-bold text-slate-800 leading-snug">' + s.name + '</p>';
+    sHtml += statusPill(s.status);
+    sHtml += '</div>';
+    sHtml += '<p class="text-[10px] text-slate-500 mt-1 leading-relaxed">' + s.role + '</p>';
+    sHtml += '</div></div>';
+  });
+  document.getElementById('sources').innerHTML = sHtml;
+
+  var pHtml = '';
+  PENDING.forEach(function (p) {
+    pHtml += '<div class="px-3 py-3">';
+    pHtml += '<div class="flex items-start justify-between gap-2">';
+    pHtml += '<p class="text-[11px] font-bold text-slate-800 leading-snug">' + p.name + '</p>';
+    pHtml += '<span class="shrink-0 text-[9px] font-bold rounded-full px-2 py-0.5 bg-slate-100 text-slate-500">' + p.tag + '</span>';
+    pHtml += '</div>';
+    pHtml += '<p class="text-[10px] text-slate-500 mt-1 leading-relaxed">' + p.detail + '</p>';
+    pHtml += '</div>';
+  });
+  document.getElementById('pending').innerHTML = pHtml;
+
+})();
+</script>
+</body>
+</html>

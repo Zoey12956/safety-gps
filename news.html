@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html class="w-full h-full overflow-hidden" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Safety-first GPS — Safety News</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #DCE2E9;
+    -webkit-font-smoothing: antialiased;
+  }
+  .noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  svg text { font-family: inherit; }
+</style>
+</head>
+<body class="w-full h-full m-0 overflow-hidden flex items-center justify-center">
+<div class="w-full h-full max-w-[393px] max-h-[852px] bg-[#F4F6F9] flex flex-col overflow-hidden relative shadow-2xl">
+<header class="shrink-0 bg-[#0B1B34] px-4 pt-3 pb-3">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-9 h-9 rounded-xl bg-[#059669] flex items-center justify-center shrink-0">
+<iconify-icon class="text-white text-[19px]" icon="mdi:newspaper-variant-outline"></iconify-icon>
+</div>
+<div class="min-w-0">
+<p class="text-white text-[15px] font-bold leading-tight truncate">Safety News</p>
+<p class="text-[10px] text-slate-400 leading-tight truncate">Public reports near your walking routes</p>
+</div>
+</div>
+<span class="shrink-0 text-[9px] font-bold tracking-wide px-2 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">DEMO MODE</span>
+</div>
+</header>
+<main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden noscroll">
+<!-- Sample content banner -->
+<section class="px-4 pt-3">
+<div class="rounded-2xl bg-violet-50 border border-violet-200 px-3 py-2.5">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[16px] text-violet-600 mt-0.5 shrink-0" icon="mdi:flask-outline"></iconify-icon>
+<p class="text-[11px] text-violet-900 leading-relaxed"><strong class="font-bold">Sample content.</strong> The news retrieval connector (Singapore Police Force, CNA, The Straits Times) is not configured in this build. Every item below is a placeholder that must be replaced with a verified, sourced report before release. Historical incidents are context, not a statement about current conditions.</p>
+</div>
+</div>
+</section>
+<!-- Trip context -->
+<section class="px-4 mt-3">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm px-3 py-3">
+<div class="flex items-center justify-between gap-2">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Current trip</p>
+<a class="text-[10px] font-bold text-[#047857]" href="home.html">Change trip</a>
+</div>
+<p class="text-[12px] font-bold text-slate-800 mt-1 truncate" id="tripLine"></p>
+<div class="mt-2.5 grid grid-cols-2 gap-1 bg-slate-100 rounded-xl p-1">
+<button class="text-[11px] font-bold rounded-lg py-2" id="tabRoute">Along Your Route</button>
+<button class="text-[11px] font-bold rounded-lg py-2" id="tabAll">All Singapore</button>
+</div>
+</div>
+</section>
+<!-- Type filter -->
+<section class="px-4 mt-3">
+<div class="flex flex-wrap gap-1.5" id="typeFilter"></div>
+</section>
+<!-- List -->
+<section class="px-4 mt-2 pb-6">
+<div class="text-[10px] text-slate-400 mb-2 px-1" id="listMeta"></div>
+<div class="space-y-2.5" id="list"></div>
+</section>
+</main>
+<nav class="shrink-0 bg-white border-t border-slate-200 px-1 pt-1 pb-1.5">
+<div class="grid grid-cols-4">
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="home.html">
+<iconify-icon class="text-[21px]" icon="mdi:map-marker-radius"></iconify-icon>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="routes.html">
+<iconify-icon class="text-[21px]" icon="mdi:routes"></iconify-icon>
+<span class="text-[10px] font-medium">Routes</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="safety-data.html">
+<iconify-icon class="text-[21px]" icon="mdi:database-eye-outline"></iconify-icon>
+<span class="text-[10px] font-medium">Safety Data</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[#047857]" href="news.html">
+<iconify-icon class="text-[21px]" icon="mdi:newspaper-variant-outline"></iconify-icon>
+<span class="text-[10px] font-bold">Safety News</span>
+</a>
+</div>
+</nav>
+<!-- Map modal -->
+<div class="absolute inset-0 z-40 bg-slate-900/50 p-4 flex items-end" id="mapModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden">
+<div class="px-3 py-2.5 border-b border-slate-100 flex items-center justify-between gap-2">
+<div class="min-w-0">
+<p class="text-[12px] font-bold text-slate-900 truncate">View on map</p>
+<p class="text-[10px] text-slate-400 truncate" id="mapSub"></p>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="mapClose">
+<iconify-icon class="text-[18px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="h-[240px] bg-[#E9EEF3]" id="mapWrap"></div>
+<div class="px-3 py-2.5">
+<p class="text-[10px] text-slate-500 leading-relaxed" id="mapNote"></p>
+<div class="mt-2 flex gap-2">
+<button class="flex-1 text-[11px] font-bold text-slate-700 border border-slate-200 rounded-lg py-2" id="mapEvidence">View evidence</button>
+<button class="flex-1 text-[11px] font-bold text-white bg-[#0B1B34] rounded-lg py-2" id="mapRoute">Open routes</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Source modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/60 p-4 flex items-end" id="sourceModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden">
+<div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+<p class="text-[13px] font-bold text-slate-900">Source &amp; verification</p>
+<button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="srcClose">
+<iconify-icon class="text-[16px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="px-4 py-3" id="srcBody"></div>
+</div>
+</div>
+<!-- Evidence modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/60 p-4 flex items-end" id="evidenceModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden max-h-[88%] flex flex-col">
+<div class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-start justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold text-[#DC2626] uppercase tracking-wide">Reported incident</p>
+<h3 class="text-[14px] font-bold text-slate-900 mt-1 leading-snug" id="evTitle"></h3>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="evClose">
+<iconify-icon class="text-[18px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="px-4 py-3 overflow-y-auto noscroll" id="evBody"></div>
+</div>
+</div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var MAPS = {
+    d1: {
+      id: 'd1', area: 'Bugis / Bras Basah', shortFrom: 'Bugis MRT', shortTo: 'SMU',
+      fromPt: [320, 390], toPt: [680, 110],
+      hRoads: [{ y: 110, name: 'Bugis Street' }, { y: 250, name: 'North Bridge Road' }, { y: 390, name: 'Victoria Street' }, { y: 530, name: 'Beach Road' }],
+      vRoads: [{ x: 320, name: 'Ophir Road' }, { x: 500, name: 'Middle Road' }, { x: 680, name: 'Bras Basah Road' }, { x: 860, name: 'Prinsep Street' }],
+      pois: [{ x: 390, y: 180, name: 'Bugis Junction' }, { x: 760, y: 440, name: 'National Library' }]
+    },
+    d2: {
+      id: 'd2', area: 'Orchard / Fort Canning', shortFrom: 'Orchard MRT', shortTo: 'Fort Canning Park',
+      fromPt: [140, 110], toPt: [680, 530],
+      hRoads: [{ y: 110, name: 'Orchard Road' }, { y: 250, name: 'Penang Road' }, { y: 390, name: 'Killiney Road' }, { y: 530, name: 'Fort Canning Road' }],
+      vRoads: [{ x: 320, name: 'Clemenceau Avenue' }, { x: 500, name: 'Penang Lane' }, { x: 680, name: 'Fort Canning Link' }, { x: 860, name: 'River Valley Road' }],
+      pois: [{ x: 390, y: 180, name: 'Somerset MRT' }, { x: 760, y: 440, name: 'Fort Canning Centre' }]
+    },
+    d3: {
+      id: 'd3', area: 'Tampines', shortFrom: 'Tampines MRT', shortTo: 'Our Tampines Hub',
+      fromPt: [320, 110], toPt: [680, 530],
+      hRoads: [{ y: 110, name: 'Tampines Central 1' }, { y: 250, name: 'Tampines Avenue 5' }, { y: 390, name: 'Tampines Avenue 4' }, { y: 530, name: 'Tampines Avenue 7' }],
+      vRoads: [{ x: 320, name: 'Tampines Central 5' }, { x: 500, name: 'Tampines Mall Link' }, { x: 680, name: 'Tampines Avenue 2' }, { x: 860, name: 'Tampines Avenue 9' }],
+      pois: [{ x: 390, y: 180, name: 'Tampines Mall' }, { x: 760, y: 440, name: 'Tampines Polyclinic' }]
+    },
+    d4: {
+      id: 'd4', area: 'Jurong East', shortFrom: 'Jurong East MRT', shortTo: 'Jurong Lake Gardens',
+      fromPt: [320, 110], toPt: [860, 530],
+      hRoads: [{ y: 110, name: 'Jurong Gateway Road' }, { y: 250, name: 'Boon Lay Way' }, { y: 390, name: 'Jurong Town Hall Road' }, { y: 530, name: 'Lakeside Drive' }],
+      vRoads: [{ x: 320, name: 'Jem Link' }, { x: 500, name: 'Gateway Link' }, { x: 680, name: 'Jurong East Street 13' }, { x: 860, name: 'Corporation Road' }],
+      pois: [{ x: 390, y: 180, name: 'JEM' }, { x: 760, y: 440, name: 'Lakeside MRT' }]
+    }
+  };
+
+  var TRIP = {
+    d1: 'Bugis MRT Station → Singapore Management University',
+    d2: 'Orchard MRT Station → Fort Canning Park',
+    d3: 'Tampines MRT Station → Our Tampines Hub',
+    d4: 'Jurong East MRT Station → Jurong Lake Gardens'
+  };
+
+  var NEWS = [
+    { id: 'n1', type: 'Snatch theft', title: 'Snatch theft reported near Victoria Street', area: 'Bugis', location: 'Victoria Street (approx. 500 m east of Bugis MRT)', incidentDate: '14 Aug 2024', publishedDate: '16 Aug 2024', source: 'Singapore Police Force', summary: 'A pedestrian reported that a bag was snatched from behind while walking along the footway near the Victoria Street junction during the evening peak. Police advised pedestrians to keep valuables out of view and stay alert near road crossings.', demo: 'd1', x: 520, y: 390, approximate: true, historical: true },
+    { id: 'n2', type: 'Robbery', title: 'Robbery reported along Bras Basah Road', area: 'Bras Basah', location: 'Bras Basah Road (approx.)', incidentDate: '02 Nov 2023', publishedDate: '04 Nov 2023', source: 'The Straits Times', summary: 'A man walking alone late at night was confronted and robbed along Bras Basah Road. Two suspects were later charged in court. The report did not identify a specific street segment.', demo: 'd1', x: 680, y: 350, approximate: true, historical: true },
+    { id: 'n3', type: 'Robbery', title: 'Robbery at an Orchard Road retail unit', area: 'Orchard', location: 'Orchard Road (approx.)', incidentDate: '21 Jul 2024', publishedDate: '23 Jul 2024', source: 'CNA', summary: 'Police arrested a man after a robbery at a retail unit along Orchard Road. The incident took place inside a building rather than on the public footway.', demo: 'd2', x: 420, y: 110, approximate: true, historical: true },
+    { id: 'n4', type: 'Snatch theft', title: 'Snatch theft along Penang Lane', area: 'Dhoby Ghaut', location: 'Penang Lane (approx.)', incidentDate: '09 Mar 2024', publishedDate: '11 Mar 2024', source: 'Singapore Police Force', summary: 'A woman reported that her phone was snatched while she was walking along Penang Lane in the early evening. Police reminded pedestrians to avoid using phones near the road edge.', demo: 'd2', x: 500, y: 320, approximate: true, historical: true },
+    { id: 'n5', type: 'Assault', title: 'Assault following a dispute near Tampines Avenue 5', area: 'Tampines', location: 'Tampines Avenue 5 (approx. 300 m from Tampines MRT)', incidentDate: '18 Jun 2024', publishedDate: '20 Jun 2024', source: 'CNA', summary: 'A dispute between two groups escalated into an assault on the footway near Tampines Avenue 5. One person was taken to hospital with minor injuries.', demo: 'd3', x: 320, y: 250, approximate: true, historical: true },
+    { id: 'n6', type: 'Outrage of modesty', title: 'Outrage of modesty reported at Tampines Avenue 4', area: 'Tampines', location: 'Tampines Avenue 4 (approx.)', incidentDate: '27 Sep 2024', publishedDate: '29 Sep 2024', source: 'The Straits Times', summary: 'A woman reported that she was molested while walking along a pedestrian path near Tampines Avenue 4. Police are investigating.', demo: 'd3', x: 520, y: 390, approximate: true, historical: true },
+    { id: 'n7', type: 'Snatch theft', title: 'Snatch theft at Geylang Road', area: 'Geylang', location: 'Geylang Road (approx.)', incidentDate: '30 Apr 2024', publishedDate: '02 May 2024', source: 'CNA', summary: 'A pedestrian had a gold chain snatched while waiting to cross at a junction along Geylang Road.', demo: null, x: null, y: null, approximate: true, historical: true },
+    { id: 'n8', type: 'Robbery', title: 'Robbery near a Little India MRT station exit', area: 'Little India', location: 'Bukit Timah Road (approx.)', incidentDate: '12 Jan 2024', publishedDate: '14 Jan 2024', source: 'The Straits Times', summary: 'Two men were arrested after a robbery near an MRT station exit in Little India. The victims were approached on the street at night.', demo: null, x: null, y: null, approximate: true, historical: true },
+    { id: 'n9', type: 'Assault', title: 'Assault at Clarke Quay', area: 'Clarke Quay', location: 'Clarke Quay riverside walkway (approx.)', incidentDate: '05 Dec 2023', publishedDate: '07 Dec 2023', source: 'CNA', summary: 'A fight broke out among a group near a Clarke Quay riverside walkway late at night, leaving one man with injuries.', demo: null, x: null, y: null, approximate: true, historical: true },
+    { id: 'n10', type: 'Snatch theft', title: 'Snatch theft near Toa Payoh Bus Interchange', area: 'Toa Payoh', location: 'Toa Payoh Lorong 6 (approx.)', incidentDate: '22 Feb 2024', publishedDate: '24 Feb 2024', source: 'Singapore Police Force', summary: 'A commuter reported that her handbag was snatched on a walkway leading to the bus interchange during the morning peak.', demo: null, x: null, y: null, approximate: true, historical: true },
+    { id: 'n11', type: 'Outrage of modesty', title: 'Outrage of modesty on a Woodlands walkway', area: 'Woodlands', location: 'Woodlands Avenue 5 (approx.)', incidentDate: '16 Nov 2023', publishedDate: '18 Nov 2023', source: 'Singapore Police Force', summary: 'Police appealed for information after a woman reported being molested on a pedestrian walkway in Woodlands.', demo: null, x: null, y: null, approximate: true, historical: true },
+    { id: 'n12', type: 'Snatch theft', title: 'Snatch theft at Marina Bay promenade', area: 'Marina Bay', location: 'Marina Bay waterfront (approx.)', incidentDate: '08 Aug 2024', publishedDate: '10 Aug 2024', source: 'CNA', summary: 'A visitor reported that a camera bag was snatched while she was walking along the waterfront promenade in the evening.', demo: null, x: null, y: null, approximate: true, historical: true }
+  ];
+
+  var SOURCE_INDEX = {
+    'Singapore Police Force': { url: 'https://www.police.gov.sg/media-room/news-releases', label: 'SPF newsroom index' },
+    'CNA': { url: 'https://www.channelnewsasia.com/singapore', label: 'CNA Singapore index' },
+    'The Straits Times': { url: 'https://www.straitstimes.com/singapore', label: 'ST Singapore index' }
+  };
+
+  var TYPES = ['All', 'Snatch theft', 'Robbery', 'Assault', 'Outrage of modesty'];
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(el, d) { if (el) el.style.display = d || 'block'; }
+  function hide(el) { if (el) el.style.display = 'none'; }
+
+  var state = { view: 'route', type: 'All', demo: 'd1' };
+
+  function typeStyle(t) {
+    if (t === 'Robbery') return 'bg-amber-50 text-amber-800 border-amber-100';
+    if (t === 'Snatch theft') return 'bg-red-50 text-red-700 border-red-100';
+    if (t === 'Assault') return 'bg-rose-50 text-rose-700 border-rose-100';
+    return 'bg-slate-100 text-slate-600 border-slate-200';
+  }
+
+  /* ---------------- Mini map ---------------- */
+
+  function buildMap(map, focus) {
+    var s = '';
+    s += '<svg viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" class="w-full h-full block">';
+    s += '<rect x="0" y="0" width="1000" height="640" fill="#E9EEF3"/>';
+    s += '<rect x="160" y="130" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="520" y="430" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="160" y="410" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="520" y="270" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="700" y="130" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<path d="M 0 596 C 220 566, 420 622, 640 588 C 780 566, 900 588, 1000 570 L 1000 640 L 0 640 Z" fill="#CFE4F2"/>';
+    map.hRoads.forEach(function (r) {
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+    map.vRoads.forEach(function (r) {
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+    map.hRoads.forEach(function (r) {
+      s += '<text x="46" y="' + (r.y - 17) + '" font-size="16" font-weight="600" fill="#93A0AE">' + r.name + '</text>';
+    });
+    map.vRoads.forEach(function (r) {
+      s += '<text x="' + r.x + '" y="46" font-size="16" font-weight="600" fill="#93A0AE" text-anchor="middle">' + r.name + '</text>';
+    });
+    map.pois.forEach(function (p) {
+      s += '<circle cx="' + p.x + '" cy="' + p.y + '" r="7" fill="#FFFFFF" stroke="#9AA7B4" stroke-width="3"/>';
+      s += '<text x="' + (p.x + 14) + '" y="' + (p.y + 6) + '" font-size="16" font-weight="600" fill="#7E8B99">' + p.name + '</text>';
+    });
+    s += '<circle cx="' + map.fromPt[0] + '" cy="' + map.fromPt[1] + '" r="11" fill="#0B1B34" stroke="#FFFFFF" stroke-width="5"/>';
+    s += '<circle cx="' + map.toPt[0] + '" cy="' + map.toPt[1] + '" r="11" fill="#059669" stroke="#FFFFFF" stroke-width="5"/>';
+    if (focus) {
+      s += '<circle cx="' + focus.x + '" cy="' + focus.y + '" r="46" fill="#DC2626" opacity="0.14"/>';
+      s += '<circle cx="' + focus.x + '" cy="' + focus.y + '" r="26" fill="#DC2626" opacity="0.22"/>';
+      s += '<circle cx="' + focus.x + '" cy="' + focus.y + '" r="14" fill="#DC2626" stroke="#FFFFFF" stroke-width="5"/>';
+      s += '<text x="' + focus.x + '" y="' + (focus.y + 6) + '" text-anchor="middle" font-size="19" font-weight="800" fill="#FFFFFF">!</text>';
+      s += '<text x="' + focus.x + '" y="' + (focus.y - 40) + '" text-anchor="middle" font-size="20" font-weight="700" fill="#B91C1C" stroke="#FFFFFF" stroke-width="6" paint-order="stroke">Approximate location</text>';
+    }
+    s += '</svg>';
+    return s;
+  }
+
+  /* ---------------- Render ---------------- */
+
+  function renderTabs() {
+    var on = 'bg-white text-[#047857] shadow-sm';
+    var off = 'text-slate-500';
+    $('tabRoute').className = 'text-[11px] font-bold rounded-lg py-2 ' + (state.view === 'route' ? on : off);
+    $('tabAll').className = 'text-[11px] font-bold rounded-lg py-2 ' + (state.view === 'all' ? on : off);
+  }
+
+  function renderFilter() {
+    var html = '';
+    TYPES.forEach(function (t) {
+      var on = state.type === t;
+      html += '<button data-type="' + t + '" class="text-[10px] font-bold rounded-full px-2.5 py-1 border ' +
+        (on ? 'bg-[#0B1B34] text-white border-[#0B1B34]' : 'bg-white text-slate-600 border-slate-200') + '">' + t + '</button>';
+    });
+    $('typeFilter').innerHTML = html;
+  }
+
+  function currentItems() {
+    var items = state.view === 'route'
+      ? NEWS.filter(function (n) { return n.demo === state.demo; })
+      : NEWS.slice();
+    if (state.type !== 'All') items = items.filter(function (n) { return n.type === state.type; });
+    return items;
+  }
+
+  function renderList() {
+    var items = currentItems();
+    var map = MAPS[state.demo];
+
+    $('tripLine').textContent = TRIP[state.demo];
+    $('listMeta').textContent = state.view === 'route'
+      ? items.length + ' location-linked item' + (items.length === 1 ? '' : 's') + ' near this trip · ' + map.area
+      : items.length + ' item' + (items.length === 1 ? '' : 's') + ' across Singapore (sample set)';
+
+    var el = $('list');
+    if (!items.length) {
+      var isRoute = state.view === 'route';
+      el.innerHTML =
+        '<div class="rounded-2xl border border-slate-200 bg-white p-4">' +
+        '<div class="flex items-start gap-2">' +
+        '<iconify-icon icon="' + (isRoute ? 'mdi:map-search-outline' : 'mdi:filter-off-outline') + '" class="text-[18px] text-slate-400 mt-0.5 shrink-0"></iconify-icon>' +
+        '<div><p class="text-[12px] font-bold text-slate-700">' + (isRoute ? 'No location-linked reports along this trip' : 'No items match this filter') + '</p>' +
+        '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed">' +
+        (isRoute
+          ? 'Nothing in the available sources sits near this corridor. No reports does not mean the route is safe — it may simply be a coverage gap.'
+          : 'Try selecting a different incident type.') +
+        '</p></div></div>' +
+        (isRoute ? '<a href="safety-data.html" class="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-[#047857] underline">Review data coverage<iconify-icon icon="mdi:arrow-right" class="text-[13px]"></iconify-icon></a>' : '') +
+        '</div>';
+      return;
+    }
+
+    var html = '';
+    items.forEach(function (m) {
+      html += '<article class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3">';
+      html += '<div class="flex flex-wrap items-center gap-1.5">';
+      html += '<span class="text-[9px] font-bold rounded-full px-2 py-0.5 border ' + typeStyle(m.type) + '">' + m.type + '</span>';
+      html += '<span class="text-[9px] font-bold rounded-full px-2 py-0.5 bg-slate-100 text-slate-500">Historical incident</span>';
+      if (m.demo === state.demo && state.view === 'all') {
+        html += '<span class="text-[9px] font-bold rounded-full px-2 py-0.5 bg-emerald-50 text-[#047857] border border-emerald-100">On your trip</span>';
+      }
+      html += '</div>';
+      html += '<h3 class="text-[13px] font-bold text-slate-900 mt-2 leading-snug">' + m.title + '</h3>';
+      html += '<p class="text-[11px] text-slate-600 mt-1.5 flex items-start gap-1"><iconify-icon icon="mdi:map-marker-outline" class="text-[13px] text-slate-400 mt-0.5 shrink-0"></iconify-icon><span>' + m.location;
+      if (m.approximate) html += ' · <span class="text-amber-700 font-semibold">Approximate location</span>';
+      html += '</span></p>';
+      html += '<p class="text-[10px] text-slate-400 mt-1 leading-relaxed">Incident date: <span class="font-semibold text-slate-500">' + m.incidentDate + '</span> · Published: <span class="font-semibold text-slate-500">' + m.publishedDate + '</span> · Source: <span class="font-semibold text-slate-500">' + m.source + '</span></p>';
+      html += '<p class="text-[11px] text-slate-600 mt-2 leading-relaxed">' + m.summary + '</p>';
+      html += '<div class="mt-2 flex items-center gap-1.5">';
+      html += '<span class="text-[9px] font-bold rounded-full px-2 py-0.5 bg-violet-50 text-violet-700 border border-violet-100">Sample content</span>';
+      html += '<span class="text-[9px] text-slate-400">Article link pending verification</span>';
+      html += '</div>';
+      html += '<div class="mt-2.5 flex gap-2">';
+      html += '<button data-map="' + m.id + '" class="flex-1 flex items-center justify-center gap-1 text-[11px] font-bold text-slate-700 border border-slate-200 rounded-lg py-2"><iconify-icon icon="mdi:map-outline" class="text-[14px]"></iconify-icon>View on Map</button>';
+      html += '<button data-src="' + m.id + '" class="flex-1 flex items-center justify-center gap-1 text-[11px] font-bold text-white bg-[#0B1B34] rounded-lg py-2"><iconify-icon icon="mdi:open-in-new" class="text-[14px]"></iconify-icon>Read Source</button>';
+      html += '</div></article>';
+    });
+    el.innerHTML = html;
+  }
+
+  function render() {
+    renderTabs();
+    renderFilter();
+    renderList();
+  }
+
+  /* ---------------- Modals ---------------- */
+
+  function openMap(id) {
+    var m = NEWS.filter(function (n) { return n.id === id; })[0];
+    if (!m) return;
+    var map = m.demo ? MAPS[m.demo] : null;
+    $('mapSub').textContent = m.demo ? ('Trip area: ' + map.area) : m.area + ' (area only)';
+
+    if (map && m.x !== null) {
+      $('mapWrap').innerHTML = buildMap(map, { x: m.x, y: m.y });
+      $('mapNote').textContent = 'Marker shows an approximate location based on the area named in the report. It is not an exact address and should not be used to identify a specific block or unit.';
+    } else {
+      $('mapWrap').innerHTML = buildMap(MAPS.d1, null);
+      $('mapNote').textContent = 'This report is only linked to a general area (' + m.area + '), so no precise pin can be placed. Reports without a usable location are never used to recommend a specific street segment.';
+    }
+    $('mapEvidence').setAttribute('data-open', m.id);
+    show($('mapModal'), 'flex');
+  }
+
+  function openSource(id) {
+    var m = NEWS.filter(function (n) { return n.id === id; })[0];
+    if (!m) return;
+    var idx = SOURCE_INDEX[m.source];
+    var html = '';
+    html += '<p class="text-[12px] font-bold text-slate-900">' + m.title + '</p>';
+    html += '<div class="mt-2 text-[11px] text-slate-500 space-y-1">';
+    html += '<p>Publisher: <span class="font-semibold text-slate-700">' + m.source + '</span></p>';
+    html += '<p>Published: <span class="font-semibold text-slate-700">' + m.publishedDate + '</span></p>';
+    html += '<p>Incident date: <span class="font-semibold text-slate-700">' + m.incidentDate + '</span></p>';
+    html += '<p>Location: <span class="font-semibold text-slate-700">' + m.location + '</span></p>';
+    html += '</div>';
+    html += '<div class="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">';
+    html += '<p class="text-[11px] font-bold text-amber-900">Sample content — article link pending verification</p>';
+    html += '<p class="text-[11px] text-amber-800 mt-1 leading-relaxed">This build has no live news connector, so the item has not been matched to a verified article URL. Connect the source feed and replace this placeholder with a real, sourced report.</p>';
+    html += '</div>';
+    if (idx) {
+      html += '<a href="' + idx.url + '" target="_blank" rel="noopener" class="mt-3 flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-3 py-2.5">';
+      html += '<span><span class="block text-[12px] font-bold text-slate-900">' + idx.label + '</span>';
+      html += '<span class="block text-[10px] text-slate-400">Official site · opens externally</span></span>';
+      html += '<iconify-icon icon="mdi:open-in-new" class="text-[16px] text-slate-400"></iconify-icon></a>';
+      html += '<p class="text-[10px] text-slate-400 mt-2 leading-relaxed">Opens the publisher index page, not the article itself, because no article URL has been verified.</p>';
+    }
+    $('srcBody').innerHTML = html;
+    show($('sourceModal'), 'flex');
+  }
+
+  function openEvidence(id) {
+    var m = NEWS.filter(function (n) { return n.id === id; })[0];
+    if (!m) return;
+    $('evTitle').textContent = m.title;
+    var html = '';
+    html += '<p class="text-[12px] text-slate-600 leading-relaxed">' + m.summary + '</p>';
+    html += '<dl class="mt-3 divide-y divide-slate-100 border-t border-slate-100">';
+    var row = function (k, v) {
+      return '<div class="flex items-start justify-between gap-3 py-2"><dt class="text-[11px] text-slate-400 shrink-0">' + k + '</dt><dd class="text-[11px] font-semibold text-slate-700 text-right">' + v + '</dd></div>';
+    };
+    html += row('Type', m.type);
+    html += row('Location', m.location);
+    html += row('Incident date', m.incidentDate);
+    html += row('Published', m.publishedDate);
+    html += row('Source', m.source);
+    html += row('Status', 'Historical incident · Sample content');
+    html += '</dl>';
+    $('evBody').innerHTML = html;
+    show($('evidenceModal'), 'flex');
+  }
+
+  /* ---------------- Events ---------------- */
+
+  $('tabRoute').addEventListener('click', function () { state.view = 'route'; render(); });
+  $('tabAll').addEventListener('click', function () { state.view = 'all'; render(); });
+  $('typeFilter').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-type]');
+    if (b) { state.type = b.getAttribute('data-type'); render(); }
+  });
+  $('list').addEventListener('click', function (e) {
+    var m = e.target.closest('[data-map]');
+    if (m) { openMap(m.getAttribute('data-map')); return; }
+    var s = e.target.closest('[data-src]');
+    if (s) openSource(s.getAttribute('data-src'));
+  });
+  $('mapClose').addEventListener('click', function () { hide($('mapModal')); });
+  $('mapModal').addEventListener('click', function (e) { if (e.target === $('mapModal')) hide($('mapModal')); });
+  $('mapEvidence').addEventListener('click', function () { hide($('mapModal')); openEvidence(this.getAttribute('data-open')); });
+  $('mapRoute').addEventListener('click', function () { window.location.href = 'routes.html'; });
+  $('srcClose').addEventListener('click', function () { hide($('sourceModal')); });
+  $('sourceModal').addEventListener('click', function (e) { if (e.target === $('sourceModal')) hide($('sourceModal')); });
+  $('evClose').addEventListener('click', function () { hide($('evidenceModal')); });
+  $('evidenceModal').addEventListener('click', function (e) { if (e.target === $('evidenceModal')) hide($('evidenceModal')); });
+
+  try {
+    var saved = localStorage.getItem('sfgps_demo');
+    if (saved && MAPS[saved]) state.demo = saved;
+  } catch (e) {}
+
+  render();
+
+})();
+</script>
+</body>
+</html>

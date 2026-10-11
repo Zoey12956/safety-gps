@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+
+<html class="w-full h-full overflow-hidden" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Safety-first GPS — Plan a safer walk</title>
+<script src="https://modao.cc/agent-py/static/source/js/tailwindcss.js"></script>
+<script src="https://modao.cc/agent-py/static/source/js/iconify-icon.min.js"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #DCE2E9;
+    -webkit-font-smoothing: antialiased;
+  }
+  .noscroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  svg text { font-family: inherit; }
+  .inc-marker { cursor: pointer; }
+</style>
+</head>
+<body class="w-full h-full m-0 overflow-hidden flex items-center justify-center">
+<div class="w-full h-full max-w-[393px] max-h-[852px] bg-[#F4F6F9] flex flex-col overflow-hidden relative shadow-2xl">
+<!-- Header -->
+<header class="shrink-0 bg-[#0B1B34] px-4 pt-3 pb-3">
+<div class="flex items-center justify-between gap-2">
+<div class="flex items-center gap-2 min-w-0">
+<div class="w-9 h-9 rounded-xl bg-[#059669] flex items-center justify-center shrink-0">
+<iconify-icon class="text-white text-[20px]" icon="mdi:shield-check"></iconify-icon>
+</div>
+<div class="min-w-0">
+<p class="text-white text-[15px] font-bold leading-tight truncate">Safety-first GPS</p>
+<p class="text-[10px] text-slate-400 leading-tight truncate">Singapore walking navigation</p>
+</div>
+</div>
+<span class="shrink-0 text-[9px] font-bold tracking-wide px-2 py-1 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">DEMO MODE</span>
+</div>
+</header>
+<!-- Scrollable main -->
+<main class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden noscroll">
+<!-- Search -->
+<section class="px-4 pt-4">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+<div class="flex items-start justify-between gap-2">
+<div>
+<h1 class="text-[17px] font-bold text-slate-900 leading-tight">Plan a safer walk</h1>
+<p class="text-[12px] text-slate-500 mt-1 leading-relaxed">Compare the fastest walking route with an alternative supported by public safety reports.</p>
+</div>
+<a class="shrink-0 text-[9px] font-bold text-[#047857] bg-emerald-50 border border-emerald-100 rounded-full px-2 py-1 leading-tight text-center" href="safety-data.html">NEWS/ DATA<br/>GROUP</a>
+</div>
+<div class="mt-4 space-y-2">
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+<iconify-icon class="text-[16px] text-slate-400 shrink-0" icon="mdi:circle-slice-8"></iconify-icon>
+<input autocomplete="off" class="w-full bg-transparent text-[13px] text-slate-800 placeholder-slate-400 outline-none" id="origin" list="sgPlaces" placeholder="Start — e.g. Bugis MRT Station" type="text"/>
+</div>
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+<iconify-icon class="text-[16px] text-[#059669] shrink-0" icon="mdi:map-marker"></iconify-icon>
+<input autocomplete="off" class="w-full bg-transparent text-[13px] text-slate-800 placeholder-slate-400 outline-none" id="destination" list="sgPlaces" placeholder="Destination — e.g. SMU" type="text"/>
+</div>
+</div>
+<button class="w-full mt-3 bg-[#059669] hover:bg-[#047857] text-white text-[14px] font-bold rounded-xl py-3 flex items-center justify-center gap-2" id="findBtn">
+<iconify-icon class="text-[18px]" icon="mdi:shield-search"></iconify-icon>
+          Find a Safer Route
+        </button>
+<div class="mt-3 text-[11px] leading-relaxed text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2" id="inputNotice" style="display:none"></div>
+<div class="mt-4">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Demo routes (Demo Mode)</p>
+<div class="mt-2 flex flex-wrap gap-2" id="demoChips"></div>
+</div>
+</div>
+</section>
+<!-- Map -->
+<section class="px-4 mt-4">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="px-3 py-2 flex items-center justify-between border-b border-slate-100">
+<p class="text-[12px] font-bold text-slate-700">Route map</p>
+<span class="text-[9px] text-slate-400">Schematic · illustrative · not to scale</span>
+</div>
+<div class="relative">
+<div class="h-[300px] bg-[#E9EEF3]" id="mapWrap"></div>
+<span class="absolute top-2 left-2 text-[10px] font-semibold bg-white/95 border border-slate-200 rounded-full px-2 py-1 text-slate-600 max-w-[200px] truncate" id="mapLabel">No route selected</span>
+<button class="absolute top-2 right-2 flex items-center gap-1 bg-[#DC2626] text-white text-[11px] font-bold rounded-full px-3 py-2 shadow-lg" id="sosBtn">
+<iconify-icon class="text-[14px]" icon="mdi:alarm-light"></iconify-icon> SOS
+          </button>
+<div class="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1.5" id="mapLegend"></div>
+</div>
+</div>
+<p class="text-[10px] text-slate-400 mt-2 leading-relaxed px-1">Map data connector not configured. Layout shown is a schematic illustration for Demo Mode — street geometry is simplified and routes are not turn-by-turn output.</p>
+</section>
+<!-- Results -->
+<section class="px-4 mt-4" id="results"></section>
+<!-- Disclaimer -->
+<section class="px-4 mt-4 pb-6">
+<div class="rounded-2xl bg-[#0B1B34] px-4 py-3">
+<div class="flex items-start gap-2">
+<iconify-icon class="text-[16px] text-slate-400 mt-0.5 shrink-0" icon="mdi:information-outline"></iconify-icon>
+<p class="text-[11px] text-slate-300 leading-relaxed">Based on available reports and public data. Coverage may be incomplete or outdated. A recommended route does not guarantee safety.</p>
+</div>
+</div>
+</section>
+<datalist id="sgPlaces"></datalist>
+</main>
+<!-- Bottom navigation -->
+<nav class="shrink-0 bg-white border-t border-slate-200 px-1 pt-1 pb-1.5">
+<div class="grid grid-cols-4">
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-[#047857]" href="home.html">
+<iconify-icon class="text-[21px]" icon="mdi:map-marker-radius"></iconify-icon>
+<span class="text-[10px] font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="routes.html">
+<iconify-icon class="text-[21px]" icon="mdi:routes"></iconify-icon>
+<span class="text-[10px] font-medium">Routes</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="safety-data.html">
+<iconify-icon class="text-[21px]" icon="mdi:database-eye-outline"></iconify-icon>
+<span class="text-[10px] font-medium">Safety Data</span>
+</a>
+<a class="flex flex-col items-center gap-0.5 py-1.5 rounded-xl text-slate-400" href="news.html">
+<iconify-icon class="text-[21px]" icon="mdi:newspaper-variant-outline"></iconify-icon>
+<span class="text-[10px] font-medium">Safety News</span>
+</a>
+</div>
+</nav>
+<!-- Evidence modal -->
+<div class="absolute inset-0 z-40 bg-slate-900/50 p-4 flex items-end" id="evidenceModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden max-h-[88%] flex flex-col">
+<div class="px-4 pt-4 pb-3 border-b border-slate-100 flex items-start justify-between gap-3">
+<div>
+<p class="text-[10px] font-bold text-[#DC2626] uppercase tracking-wide">Reported incident</p>
+<h3 class="text-[14px] font-bold text-slate-900 mt-1 leading-snug" id="evTitle"></h3>
+</div>
+<button class="shrink-0 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="evClose">
+<iconify-icon class="text-[18px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="px-4 py-3 overflow-y-auto noscroll" id="evBody"></div>
+<div class="px-4 py-3 border-t border-slate-100">
+<button class="w-full text-[13px] font-bold text-white bg-[#0B1B34] rounded-xl py-2.5" id="evRead">Read source details</button>
+</div>
+</div>
+</div>
+<!-- SOS modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/60 p-4 flex items-end" id="sosModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden">
+<div class="bg-[#DC2626] px-4 py-3">
+<p class="text-white text-[15px] font-bold">Emergency</p>
+<p class="text-red-100 text-[11px] mt-0.5">Choose who you want to contact. You will be asked to confirm.</p>
+</div>
+<div class="p-4 space-y-2">
+<button class="w-full flex items-center gap-3 border border-slate-200 rounded-xl px-3 py-3 text-left" data-sos="police">
+<span class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+<iconify-icon class="text-[18px] text-[#DC2626]" icon="mdi:police-badge"></iconify-icon>
+</span>
+<span class="min-w-0">
+<span class="block text-[13px] font-bold text-slate-900">Call Police / Emergency Services</span>
+<span class="block text-[11px] text-slate-500">Singapore emergency line · 999</span>
+</span>
+</button>
+<button class="w-full flex items-center gap-3 border border-slate-200 rounded-xl px-3 py-3 text-left" data-sos="contact">
+<span class="w-9 h-9 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+<iconify-icon class="text-[18px] text-[#047857]" icon="mdi:account-heart"></iconify-icon>
+</span>
+<span class="min-w-0">
+<span class="block text-[13px] font-bold text-slate-900">Call a Trusted Contact</span>
+<span class="block text-[11px] text-slate-500" id="contactSub">Aisha Rahman · +65 9123 4567</span>
+</span>
+</button>
+<button class="w-full text-[13px] font-semibold text-slate-500 py-2" id="sosCancel">Cancel</button>
+</div>
+</div>
+</div>
+<!-- Confirm modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/70 p-4 flex items-center" id="confirmModal" style="display:none">
+<div class="w-full bg-white rounded-2xl p-4">
+<h3 class="text-[14px] font-bold text-slate-900" id="cfTitle"></h3>
+<p class="text-[12px] text-slate-500 mt-2 leading-relaxed" id="cfBody"></p>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 text-[13px] font-semibold text-slate-600 border border-slate-200 rounded-xl py-2.5" id="cfCancel">Cancel</button>
+<button class="flex-1 text-[13px] font-bold text-white bg-[#DC2626] rounded-xl py-2.5" id="cfOk">Confirm</button>
+</div>
+</div>
+</div>
+<!-- Source modal -->
+<div class="absolute inset-0 z-50 bg-slate-900/60 p-4 flex items-end" id="sourceModal" style="display:none">
+<div class="w-full bg-white rounded-2xl overflow-hidden">
+<div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+<p class="text-[13px] font-bold text-slate-900">Source &amp; verification</p>
+<button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center" id="srcClose">
+<iconify-icon class="text-[16px] text-slate-500" icon="mdi:close"></iconify-icon>
+</button>
+</div>
+<div class="px-4 py-3" id="srcBody"></div>
+</div>
+</div>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- Data ---------------- */
+
+  var DEMOS = {
+    d1: {
+      id: 'd1',
+      from: 'Bugis MRT Station', shortFrom: 'Bugis MRT',
+      to: 'Singapore Management University', shortTo: 'SMU',
+      area: 'Bugis / Bras Basah',
+      fromPt: [320, 390], toPt: [680, 110],
+      hRoads: [
+        { y: 110, name: 'Bugis Street' },
+        { y: 250, name: 'North Bridge Road' },
+        { y: 390, name: 'Victoria Street' },
+        { y: 530, name: 'Beach Road' }
+      ],
+      vRoads: [
+        { x: 320, name: 'Ophir Road' },
+        { x: 500, name: 'Middle Road' },
+        { x: 680, name: 'Bras Basah Road' },
+        { x: 860, name: 'Prinsep Street' }
+      ],
+      pois: [
+        { x: 390, y: 180, name: 'Bugis Junction', kind: 'mall' },
+        { x: 760, y: 440, name: 'National Library', kind: 'landmark' }
+      ],
+      fastest: {
+        pts: [[320, 390], [680, 390], [680, 110]],
+        km: '1.0', min: 13,
+        reason: 'Most direct footway — straight along Victoria Street, then north along Bras Basah Road.',
+        streets: ['Victoria Street', 'Bras Basah Road']
+      },
+      safer: {
+        pts: [[320, 390], [320, 250], [860, 250], [860, 110], [680, 110]],
+        km: '1.3', min: 17,
+        reason: 'Avoids two recorded incident locations on Victoria Street and the southern stretch of Bras Basah Road, and uses signalised crossings at North Bridge Road and Prinsep Street.',
+        streets: ['Ophir Road', 'North Bridge Road', 'Prinsep Street'],
+        extraKm: '+0.3 km', extraMin: '+4 min'
+      },
+      insufficient: false
+    },
+    d2: {
+      id: 'd2',
+      from: 'Orchard MRT Station', shortFrom: 'Orchard MRT',
+      to: 'Fort Canning Park', shortTo: 'Fort Canning Park',
+      area: 'Orchard / Fort Canning',
+      fromPt: [140, 110], toPt: [680, 530],
+      hRoads: [
+        { y: 110, name: 'Orchard Road' },
+        { y: 250, name: 'Penang Road' },
+        { y: 390, name: 'Killiney Road' },
+        { y: 530, name: 'Fort Canning Road' }
+      ],
+      vRoads: [
+        { x: 320, name: 'Clemenceau Avenue' },
+        { x: 500, name: 'Penang Lane' },
+        { x: 680, name: 'Fort Canning Link' },
+        { x: 860, name: 'River Valley Road' }
+      ],
+      pois: [
+        { x: 390, y: 180, name: 'Somerset MRT', kind: 'mrt' },
+        { x: 760, y: 440, name: 'Fort Canning Centre', kind: 'landmark' }
+      ],
+      fastest: {
+        pts: [[140, 110], [500, 110], [500, 530], [680, 530]],
+        km: '1.4', min: 18,
+        reason: 'Shortest distance — Orchard Road, then Penang Lane down to Fort Canning Road.',
+        streets: ['Orchard Road', 'Penang Lane', 'Fort Canning Road']
+      },
+      safer: {
+        pts: [[140, 110], [320, 110], [320, 250], [860, 250], [860, 530], [680, 530]],
+        km: '1.7', min: 22,
+        reason: 'Avoids the two road segments where incidents were recorded, and stays on wider, lit footways via Penang Road and River Valley Road.',
+        streets: ['Clemenceau Avenue', 'Penang Road', 'River Valley Road'],
+        extraKm: '+0.3 km', extraMin: '+4 min'
+      },
+      insufficient: false
+    },
+    d3: {
+      id: 'd3',
+      from: 'Tampines MRT Station', shortFrom: 'Tampines MRT',
+      to: 'Our Tampines Hub', shortTo: 'Our Tampines Hub',
+      area: 'Tampines',
+      fromPt: [320, 110], toPt: [680, 530],
+      hRoads: [
+        { y: 110, name: 'Tampines Central 1' },
+        { y: 250, name: 'Tampines Avenue 5' },
+        { y: 390, name: 'Tampines Avenue 4' },
+        { y: 530, name: 'Tampines Avenue 7' }
+      ],
+      vRoads: [
+        { x: 320, name: 'Tampines Central 5' },
+        { x: 500, name: 'Tampines Mall Link' },
+        { x: 680, name: 'Tampines Avenue 2' },
+        { x: 860, name: 'Tampines Avenue 9' }
+      ],
+      pois: [
+        { x: 390, y: 180, name: 'Tampines Mall', kind: 'mall' },
+        { x: 760, y: 440, name: 'Tampines Polyclinic', kind: 'clinic' }
+      ],
+      fastest: {
+        pts: [[320, 110], [320, 390], [680, 390], [680, 530]],
+        km: '1.1', min: 14,
+        reason: 'Most direct — south on Tampines Central 5, then east along Tampines Avenue 4.',
+        streets: ['Tampines Central 5', 'Tampines Avenue 4', 'Tampines Avenue 2']
+      },
+      safer: {
+        pts: [[320, 110], [860, 110], [860, 530], [680, 530]],
+        km: '1.5', min: 19,
+        reason: 'Avoids two recorded incident locations and uses the covered walkway along Tampines Central 1 and Tampines Avenue 9, with more open sightlines after dark.',
+        streets: ['Tampines Central 1', 'Tampines Avenue 9', 'Tampines Avenue 7'],
+        extraKm: '+0.4 km', extraMin: '+5 min'
+      },
+      insufficient: false
+    },
+    d4: {
+      id: 'd4',
+      from: 'Jurong East MRT Station', shortFrom: 'Jurong East MRT',
+      to: 'Jurong Lake Gardens', shortTo: 'Jurong Lake Gardens',
+      area: 'Jurong East',
+      fromPt: [320, 110], toPt: [860, 530],
+      hRoads: [
+        { y: 110, name: 'Jurong Gateway Road' },
+        { y: 250, name: 'Boon Lay Way' },
+        { y: 390, name: 'Jurong Town Hall Road' },
+        { y: 530, name: 'Lakeside Drive' }
+      ],
+      vRoads: [
+        { x: 320, name: 'Jem Link' },
+        { x: 500, name: 'Gateway Link' },
+        { x: 680, name: 'Jurong East Street 13' },
+        { x: 860, name: 'Corporation Road' }
+      ],
+      pois: [
+        { x: 390, y: 180, name: 'JEM', kind: 'mall' },
+        { x: 760, y: 440, name: 'Lakeside MRT', kind: 'mrt' }
+      ],
+      fastest: {
+        pts: [[320, 110], [680, 110], [680, 530], [860, 530]],
+        km: '1.6', min: 20,
+        reason: 'Direct route via Jurong Gateway Road and Jurong East Street 13.',
+        streets: ['Jurong Gateway Road', 'Jurong East Street 13', 'Lakeside Drive']
+      },
+      safer: null,
+      insufficient: true
+    }
+  };
+
+  var NEWS = [
+    { id: 'n1', type: 'Snatch theft', title: 'Snatch theft reported near Victoria Street', area: 'Bugis', location: 'Victoria Street (approx. 500 m east of Bugis MRT)', incidentDate: '14 Aug 2024', publishedDate: '16 Aug 2024', source: 'Singapore Police Force', summary: 'A pedestrian reported that a bag was snatched from behind while walking along the footway near the Victoria Street junction during the evening peak. Police advised pedestrians to keep valuables out of view and stay alert near road crossings.', demo: 'd1', x: 520, y: 390 },
+    { id: 'n2', type: 'Robbery', title: 'Robbery reported along Bras Basah Road', area: 'Bras Basah', location: 'Bras Basah Road (approx.)', incidentDate: '02 Nov 2023', publishedDate: '04 Nov 2023', source: 'The Straits Times', summary: 'A man walking alone late at night was confronted and robbed along Bras Basah Road. Two suspects were later charged in court. The report did not identify a specific street segment.', demo: 'd1', x: 680, y: 350 },
+    { id: 'n3', type: 'Robbery', title: 'Robbery at an Orchard Road retail unit', area: 'Orchard', location: 'Orchard Road (approx.)', incidentDate: '21 Jul 2024', publishedDate: '23 Jul 2024', source: 'CNA', summary: 'Police arrested a man after a robbery at a retail unit along Orchard Road. The incident took place inside a building rather than on the public footway.', demo: 'd2', x: 420, y: 110 },
+    { id: 'n4', type: 'Snatch theft', title: 'Snatch theft along Penang Lane', area: 'Dhoby Ghaut', location: 'Penang Lane (approx.)', incidentDate: '09 Mar 2024', publishedDate: '11 Mar 2024', source: 'Singapore Police Force', summary: 'A woman reported that her phone was snatched while she was walking along Penang Lane in the early evening. Police reminded pedestrians to avoid using phones near the road edge.', demo: 'd2', x: 500, y: 320 },
+    { id: 'n5', type: 'Assault', title: 'Assault following a dispute near Tampines Avenue 5', area: 'Tampines', location: 'Tampines Avenue 5 (approx. 300 m from Tampines MRT)', incidentDate: '18 Jun 2024', publishedDate: '20 Jun 2024', source: 'CNA', summary: 'A dispute between two groups escalated into an assault on the footway near Tampines Avenue 5. One person was taken to hospital with minor injuries.', demo: 'd3', x: 320, y: 250 },
+    { id: 'n6', type: 'Outrage of modesty', title: 'Outrage of modesty reported at Tampines Avenue 4', area: 'Tampines', location: 'Tampines Avenue 4 (approx.)', incidentDate: '27 Sep 2024', publishedDate: '29 Sep 2024', source: 'The Straits Times', summary: 'A woman reported that she was molested while walking along a pedestrian path near Tampines Avenue 4. Police are investigating.', demo: 'd3', x: 520, y: 390 },
+    { id: 'n7', type: 'Snatch theft', title: 'Snatch theft at Geylang Road', area: 'Geylang', location: 'Geylang Road (approx.)', incidentDate: '30 Apr 2024', publishedDate: '02 May 2024', source: 'CNA', summary: 'A pedestrian had a gold chain snatched while waiting to cross at a junction along Geylang Road.', demo: null, x: null, y: null },
+    { id: 'n8', type: 'Robbery', title: 'Robbery near a Little India MRT station exit', area: 'Little India', location: 'Bukit Timah Road (approx.)', incidentDate: '12 Jan 2024', publishedDate: '14 Jan 2024', source: 'The Straits Times', summary: 'Two men were arrested after a robbery near an MRT station exit in Little India. The victims were approached on the street at night.', demo: null, x: null, y: null },
+    { id: 'n9', type: 'Assault', title: 'Assault at Clarke Quay', area: 'Clarke Quay', location: 'Clarke Quay riverside walkway (approx.)', incidentDate: '05 Dec 2023', publishedDate: '07 Dec 2023', source: 'CNA', summary: 'A fight broke out among a group near a Clarke Quay riverside walkway late at night, leaving one man with injuries.', demo: null, x: null, y: null },
+    { id: 'n10', type: 'Snatch theft', title: 'Snatch theft near Toa Payoh Bus Interchange', area: 'Toa Payoh', location: 'Toa Payoh Lorong 6 (approx.)', incidentDate: '22 Feb 2024', publishedDate: '24 Feb 2024', source: 'Singapore Police Force', summary: 'A commuter reported that her handbag was snatched on a walkway leading to the bus interchange during the morning peak.', demo: null, x: null, y: null },
+    { id: 'n11', type: 'Outrage of modesty', title: 'Outrage of modesty on a Woodlands walkway', area: 'Woodlands', location: 'Woodlands Avenue 5 (approx.)', incidentDate: '16 Nov 2023', publishedDate: '18 Nov 2023', source: 'Singapore Police Force', summary: 'Police appealed for information after a woman reported being molested on a pedestrian walkway in Woodlands.', demo: null, x: null, y: null },
+    { id: 'n12', type: 'Snatch theft', title: 'Snatch theft at Marina Bay promenade', area: 'Marina Bay', location: 'Marina Bay waterfront (approx.)', incidentDate: '08 Aug 2024', publishedDate: '10 Aug 2024', source: 'CNA', summary: 'A visitor reported that a camera bag was snatched while she was walking along the waterfront promenade in the evening.', demo: null, x: null, y: null }
+  ];
+
+  var SOURCE_INDEX = {
+    'Singapore Police Force': { url: 'https://www.police.gov.sg/media-room/news-releases', label: 'SPF newsroom index' },
+    'CNA': { url: 'https://www.channelnewsasia.com/singapore', label: 'CNA Singapore index' },
+    'The Straits Times': { url: 'https://www.straitstimes.com/singapore', label: 'ST Singapore index' }
+  };
+
+  var PLACES = [
+    'Bugis MRT Station', 'Singapore Management University', 'Bras Basah MRT Station', 'Bugis Junction',
+    'Orchard MRT Station', 'Fort Canning Park', 'Somerset MRT Station', 'Dhoby Ghaut MRT Station',
+    'Tampines MRT Station', 'Our Tampines Hub', 'Tampines Mall', 'Tampines Avenue 5',
+    'Jurong East MRT Station', 'Jurong Lake Gardens', 'JEM', 'Westgate',
+    'Marina Bay Sands', 'Raffles Place MRT Station', 'Esplanade Park', 'Clarke Quay',
+    'Chinatown MRT Station', 'Little India MRT Station', 'Toa Payoh MRT Station', 'Woodlands MRT Station',
+    'Nanyang Technological University', 'National University of Singapore', 'Ngee Ann City', 'Plaza Singapura',
+    'Victoria Street', 'Bras Basah Road', 'Orchard Road', 'Penang Road', 'Boon Lay Way'
+  ];
+
+  var CONTACT = { name: 'Aisha Rahman', phone: '+65 9123 4567' };
+
+  var store = {
+    demo: null,
+    route: 'safer'
+  };
+
+  function saveStore() {
+    try {
+      if (store.demo) localStorage.setItem('sfgps_demo', store.demo);
+      localStorage.setItem('sfgps_route', store.route);
+    } catch (e) { /* storage unavailable in this preview */ }
+  }
+
+  /* ---------------- Helpers ---------------- */
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function norm(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  var ALIASES = {
+    'bugis': 'Bugis MRT Station', 'bugis mrt': 'Bugis MRT Station', 'bugis station': 'Bugis MRT Station',
+    'smu': 'Singapore Management University', 'singapore management university': 'Singapore Management University',
+    'orchard': 'Orchard MRT Station', 'orchard mrt': 'Orchard MRT Station',
+    'fort canning': 'Fort Canning Park', 'fort canning park': 'Fort Canning Park',
+    'tampines': 'Tampines MRT Station', 'tampines mrt': 'Tampines MRT Station',
+    'tampines hub': 'Our Tampines Hub', 'oth': 'Our Tampines Hub',
+    'jurong east': 'Jurong East MRT Station', 'jurong east mrt': 'Jurong East MRT Station',
+    'jurong lake gardens': 'Jurong Lake Gardens'
+  };
+
+  function resolvePlace(input) {
+    var n = norm(input);
+    if (!n) return null;
+    if (ALIASES[n]) return ALIASES[n];
+    for (var k in DEMOS) {
+      if (norm(DEMOS[k].from) === n) return DEMOS[k].from;
+      if (norm(DEMOS[k].to) === n) return DEMOS[k].to;
+    }
+    return null;
+  }
+
+  function findDemo(a, b) {
+    for (var k in DEMOS) {
+      var d = DEMOS[k];
+      if (norm(d.from) === norm(a) && norm(d.to) === norm(b)) return { id: k, reversed: false };
+      if (norm(d.to) === norm(a) && norm(d.from) === norm(b)) return { id: k, reversed: true };
+    }
+    return null;
+  }
+
+  function ptsToPath(pts) {
+    return 'M ' + pts.map(function (p) { return p[0] + ' ' + p[1]; }).join(' L ');
+  }
+
+  function show(el, display) { if (el) el.style.display = display || 'block'; }
+  function hide(el) { if (el) el.style.display = 'none'; }
+
+  /* ---------------- Map rendering ---------------- */
+
+  var VW = 1000, VH = 640;
+
+  function buildMap(demo, opts) {
+    opts = opts || {};
+    var showRoutes = opts.showRoutes !== false;
+    var s = '';
+    s += '<svg viewBox="0 0 ' + VW + ' ' + VH + '" preserveAspectRatio="xMidYMid meet" class="w-full h-full block">';
+    s += '<rect x="0" y="0" width="' + VW + '" height="' + VH + '" fill="#E9EEF3"/>';
+
+    /* soft blocks & green space */
+    s += '<rect x="160" y="130" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="520" y="430" width="140" height="100" rx="18" fill="#D9E7DC"/>';
+    s += '<rect x="160" y="410" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="520" y="270" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<rect x="700" y="130" width="140" height="100" rx="18" fill="#E2E7ED"/>';
+    s += '<path d="M 0 596 C 220 566, 420 622, 640 588 C 780 566, 900 588, 1000 570 L 1000 640 L 0 640 Z" fill="#CFE4F2"/>';
+
+    /* roads */
+    demo.hRoads.forEach(function (r) {
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+    });
+    demo.vRoads.forEach(function (r) {
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#D3DCE4" stroke-width="30" stroke-linecap="round"/>';
+    });
+    demo.hRoads.forEach(function (r) {
+      s += '<line x1="40" y1="' + r.y + '" x2="960" y2="' + r.y + '" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+    demo.vRoads.forEach(function (r) {
+      s += '<line x1="' + r.x + '" y1="60" x2="' + r.x + '" y2="592" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"/>';
+    });
+
+    /* street labels */
+    demo.hRoads.forEach(function (r) {
+      s += '<text x="46" y="' + (r.y - 17) + '" font-size="16" font-weight="600" fill="#93A0AE">' + r.name + '</text>';
+    });
+    demo.vRoads.forEach(function (r) {
+      s += '<text x="' + r.x + '" y="46" font-size="16" font-weight="600" fill="#93A0AE" text-anchor="middle">' + r.name + '</text>';
+    });
+
+    /* points of interest */
+    demo.pois.forEach(function (p) {
+      s += '<circle cx="' + p.x + '" cy="' + p.y + '" r="7" fill="#FFFFFF" stroke="#9AA7B4" stroke-width="3"/>';
+      s += '<text x="' + (p.x + 14) + '" y="' + (p.y + 6) + '" font-size="16" font-weight="600" fill="#7E8B99">' + p.name + '</text>';
+    });
+
+    /* routes */
+    if (showRoutes && demo.fastest) {
+      s += '<path d="' + ptsToPath(demo.fastest.pts) + '" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>';
+      s += '<path d="' + ptsToPath(demo.fastest.pts) + '" fill="none" stroke="#F59E0B" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+    if (showRoutes && demo.safer) {
+      s += '<path d="' + ptsToPath(demo.safer.pts) + '" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>';
+      s += '<path d="' + ptsToPath(demo.safer.pts) + '" fill="none" stroke="#059669" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+
+    /* incident markers */
+    if (showRoutes) {
+      var incs = NEWS.filter(function (n) { return n.demo === demo.id && n.x !== null; });
+      incs.forEach(function (m) {
+        s += '<g class="inc-marker" data-inc="' + m.id + '">';
+        s += '<circle cx="' + m.x + '" cy="' + m.y + '" r="20" fill="#EF4444" opacity="0.20"/>';
+        s += '<circle cx="' + m.x + '" cy="' + m.y + '" r="13" fill="#DC2626" stroke="#FFFFFF" stroke-width="4"/>';
+        s += '<text x="' + m.x + '" y="' + (m.y + 6) + '" text-anchor="middle" font-size="18" font-weight="800" fill="#FFFFFF">!</text>';
+        s += '</g>';
+      });
+    }
+
+    /* origin / destination pins */
+    s += '<circle cx="' + demo.fromPt[0] + '" cy="' + demo.fromPt[1] + '" r="12" fill="#0B1B34" stroke="#FFFFFF" stroke-width="5"/>';
+    s += '<text x="' + demo.fromPt[0] + '" y="' + (demo.fromPt[1] - 26) + '" text-anchor="middle" font-size="21" font-weight="700" fill="#0B1B34" stroke="#FFFFFF" stroke-width="6" paint-order="stroke">' + demo.shortFrom + '</text>';
+    s += '<circle cx="' + demo.toPt[0] + '" cy="' + demo.toPt[1] + '" r="12" fill="#059669" stroke="#FFFFFF" stroke-width="5"/>';
+    s += '<text x="' + demo.toPt[0] + '" y="' + (demo.toPt[1] - 26) + '" text-anchor="middle" font-size="21" font-weight="700" fill="#047857" stroke="#FFFFFF" stroke-width="6" paint-order="stroke">' + demo.shortTo + '</text>';
+
+    s += '</svg>';
+    return s;
+  }
+
+  /* ---------------- Page state ---------------- */
+
+  var active = null; /* { id, reversed } */
+
+  function currentDemo() {
+    if (!active) return DEMOS.d1;
+    var d = DEMOS[active.id];
+    if (!active.reversed) return d;
+    var copy = {};
+    for (var k in d) copy[k] = d[k];
+    copy.from = d.to; copy.to = d.from;
+    copy.shortFrom = d.shortTo; copy.shortTo = d.shortFrom;
+    copy.fromPt = d.toPt; copy.toPt = d.fromPt;
+    if (d.fastest) { copy.fastest = cloneRoute(d.fastest); copy.fastest.pts = d.fastest.pts.slice().reverse(); }
+    if (d.safer) { copy.safer = cloneRoute(d.safer); copy.safer.pts = d.safer.pts.slice().reverse(); }
+    return copy;
+  }
+
+  function cloneRoute(r) {
+    var c = {};
+    for (var k in r) c[k] = r[k];
+    return c;
+  }
+
+  /* ---------------- Rendering ---------------- */
+
+  function renderChips() {
+    var html = '';
+    Object.keys(DEMOS).forEach(function (k) {
+      var d = DEMOS[k];
+      var isOn = active && active.id === k;
+      html += '<button data-demo="' + k + '" class="text-left rounded-xl border px-2.5 py-2 ' +
+        (isOn ? 'border-[#059669] bg-emerald-50' : 'border-slate-200 bg-white') + '">' +
+        '<span class="block text-[10px] font-bold ' + (isOn ? 'text-[#047857]' : 'text-slate-700') + '">' + d.shortFrom + ' → ' + d.shortTo + '</span>' +
+        '<span class="block text-[9px] text-slate-400 mt-0.5">' + d.area + '</span>' +
+        '</button>';
+    });
+    $('demoChips').innerHTML = html;
+  }
+
+  function renderLegend() {
+    var demo = currentDemo();
+    var html = '';
+    var dot = function (color, text) {
+      return '<span class="flex items-center gap-1 bg-white/95 border border-slate-200 rounded-full px-2 py-1 text-[9px] font-semibold text-slate-600">' +
+        '<span class="w-2.5 h-2.5 rounded-full" style="background:' + color + '"></span>' + text + '</span>';
+    };
+    if (active) {
+      html += dot('#F59E0B', 'Fastest Route');
+      if (demo.safer) html += dot('#059669', 'Recommended Safer Route');
+      if (NEWS.filter(function (n) { return n.demo === demo.id && n.x !== null; }).length) {
+        html += dot('#DC2626', 'Reported incident');
+      }
+    }
+    $('mapLegend').innerHTML = html;
+  }
+
+  function renderMap() {
+    var demo = currentDemo();
+    $('mapWrap').innerHTML = buildMap(demo, { showRoutes: !!active });
+    if (active) {
+      $('mapLabel').textContent = demo.shortFrom + ' → ' + demo.shortTo;
+    } else {
+      $('mapLabel').textContent = 'No route selected';
+    }
+    renderLegend();
+  }
+
+  function reasonShort(txt) {
+    return txt.length > 92 ? txt.slice(0, 90) + '…' : txt;
+  }
+
+  function renderResults() {
+    var el = $('results');
+    if (!active) {
+      el.innerHTML = emptyState();
+      return;
+    }
+    var demo = currentDemo();
+    var html = '';
+
+    if (demo.insufficient) {
+      html += '<div class="flex items-center justify-between gap-2 mb-2">';
+      html += '<h2 class="text-[14px] font-bold text-slate-900">Route comparison</h2>';
+      html += '<span class="text-[9px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-1">DEMO MODE</span>';
+      html += '</div>';
+      html += routeCard('fastest', demo, false);
+      html += '<div class="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-3">';
+      html += '<div class="flex items-start gap-2">';
+      html += '<iconify-icon icon="mdi:alert-outline" class="text-[18px] text-amber-600 mt-0.5 shrink-0"></iconify-icon>';
+      html += '<div>';
+      html += '<p class="text-[13px] font-bold text-amber-900">Insufficient data to compare route safety</p>';
+      html += '<p class="text-[11px] text-amber-800 mt-1 leading-relaxed">No location-linked reports were found within range of either candidate corridor for this trip. This is not evidence that the route is safe — <strong class="font-bold">no reports does not mean no risk</strong>. No safer route is recommended here.</p>';
+      html += '<a href="safety-data.html" class="inline-flex items-center gap-1 mt-2 text-[11px] font-bold text-amber-900 underline">See data coverage &amp; gaps<iconify-icon icon="mdi:arrow-right" class="text-[13px]"></iconify-icon></a>';
+      html += '</div></div></div>';
+      el.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="flex items-center justify-between gap-2 mb-2">';
+    html += '<h2 class="text-[14px] font-bold text-slate-900">Route comparison</h2>';
+    html += '<span class="text-[9px] font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-1">DEMO MODE</span>';
+    html += '</div>';
+    html += routeCard('fastest', demo, false);
+    html += '<div class="mt-2"></div>';
+    html += routeCard('safer', demo, true);
+    html += '<div id="pickHint" class="mt-3 text-[11px] text-slate-500 leading-relaxed"></div>';
+    html += '<a href="routes.html" class="mt-3 w-full flex items-center justify-center gap-2 bg-[#0B1B34] text-white text-[14px] font-bold rounded-xl py-3">';
+    html += '<iconify-icon icon="mdi:map-search-outline" class="text-[18px]"></iconify-icon> Compare routes &amp; view evidence';
+    html += '</a>';
+    el.innerHTML = html;
+  }
+
+  function emptyState() {
+    var steps = ['Search', 'Compare', 'Evidence', 'Choose', 'Navigate'];
+    var html = '';
+    html += '<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">';
+    html += '<h2 class="text-[14px] font-bold text-slate-900">How this works</h2>';
+    html += '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Every route here is paired with the public safety records that sit near it, so you can decide with evidence instead of guesswork.</p>';
+    html += '<div class="mt-3 flex items-center flex-wrap gap-1">';
+    steps.forEach(function (s, i) {
+      html += '<span class="text-[9px] font-bold text-slate-600 bg-slate-100 rounded-full px-2 py-1">' + (i + 1) + '. ' + s + '</span>';
+      if (i < steps.length - 1) html += '<iconify-icon icon="mdi:chevron-right" class="text-[12px] text-slate-300"></iconify-icon>';
+    });
+    html += '</div>';
+    html += '<div class="mt-4 rounded-xl bg-slate-50 border border-slate-200 p-3">';
+    html += '<p class="text-[11px] font-bold text-slate-700">Demo Mode</p>';
+    html += '<p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Route planning, place search and news retrieval are not connected to live services yet. Four real Singapore origin–destination pairs are available below; entering anything else will not generate a route.</p>';
+    html += '</div>';
+    html += '<div class="mt-3 space-y-2">';
+    html += '<p class="text-[11px] text-slate-500">Pick a demo route above, or type a start and destination and tap <span class="font-bold text-slate-700">Find a Safer Route</span>.</p>';
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function routeCard(kind, demo, recommended) {
+    var r = demo[kind];
+    if (!r) return '';
+    var isFast = kind === 'fastest';
+    var color = isFast ? '#F59E0B' : '#059669';
+    var chipBg = isFast ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
+    var title = isFast ? 'Fastest Route' : 'Recommended Safer Route';
+    var icons = isFast ? 'mdi:flash-outline' : 'mdi:shield-check-outline';
+    var incs = NEWS.filter(function (n) { return n.demo === demo.id && n.x !== null; });
+    var nearFast = isFast ? incs.length : 0;
+
+    var html = '';
+    html += '<div class="rounded-2xl border bg-white shadow-sm overflow-hidden ' + (recommended ? 'border-[#059669] ring-1 ring-emerald-100' : 'border-slate-200') + '">';
+    html += '<div class="px-3 pt-3 pb-2 flex items-start justify-between gap-2">';
+    html += '<div class="flex items-center gap-2 min-w-0">';
+    html += '<span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:' + (isFast ? '#FEF3C7' : '#D1FAE5') + '">';
+    html += '<iconify-icon icon="' + icons + '" class="text-[17px]" style="color:' + (isFast ? '#B45309' : '#047857') + '"></iconify-icon></span>';
+    html += '<div class="min-w-0"><p class="text-[13px] font-bold text-slate-900 leading-tight">' + title + '</p>';
+    html += '<p class="text-[10px] text-slate-400 mt-0.5">Schematic estimate · Demo Mode</p></div>';
+    html += '</div>';
+    html += '<span class="text-[9px] font-bold rounded-full px-2 py-1 shrink-0 ' + chipBg + '">' + (isFast ? 'FASTEST' : 'RECOMMENDED') + '</span>';
+    html += '</div>';
+    html += '<div class="px-3 flex items-end gap-3">';
+    html += '<p class="text-[26px] font-extrabold leading-none" style="color:' + color + '">' + r.min + '<span class="text-[12px] font-bold ml-0.5">min</span></p>';
+    html += '<p class="text-[12px] text-slate-500 pb-0.5">' + r.km + ' km walk</p>';
+    if (!isFast && r.extraMin) html += '<p class="ml-auto text-[10px] font-bold text-slate-500 pb-0.5">' + r.extraMin + ' · ' + r.extraKm + '</p>';
+    html += '</div>';
+    html += '<div class="px-3 mt-2 pb-3">';
+    html += '<p class="text-[11px] text-slate-600 leading-relaxed">' + r.reason + '</p>';
+    html += '<div class="mt-2 flex flex-wrap gap-1">';
+    r.streets.forEach(function (s) {
+      html += '<span class="text-[9px] font-semibold text-slate-500 bg-slate-100 rounded-md px-1.5 py-0.5">' + s + '</span>';
+    });
+    html += '</div>';
+    if (isFast && nearFast > 0) {
+      html += '<div class="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-red-700 bg-red-50 border border-red-100 rounded-lg px-2 py-1.5">';
+      html += '<iconify-icon icon="mdi:alert-circle-outline" class="text-[13px]"></iconify-icon>';
+      html += nearFast + ' recorded incident location' + (nearFast > 1 ? 's' : '') + ' near this route';
+      html += '</div>';
+    }
+    if (!isFast) {
+      var nearSafe = incs.filter(function (n) { return n.demo === demo.id && n.x !== null; }).length;
+      html += '<div class="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-lg px-2 py-1.5">';
+      html += '<iconify-icon icon="mdi:check-circle-outline" class="text-[13px]"></iconify-icon>';
+      html += 'Keeps clear of the ' + nearSafe + ' recorded incident segment' + (nearSafe > 1 ? 's' : '') + ' identified on this trip';
+      html += '</div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function render() {
+    renderChips();
+    renderMap();
+    renderResults();
+  }
+
+  /* ---------------- Modals ---------------- */
+
+  function openEvidence(id) {
+    var m = NEWS.filter(function (n) { return n.id === id; })[0];
+    if (!m) return;
+    $('evTitle').textContent = m.title;
+    var html = '';
+    html += '<div class="flex flex-wrap gap-1.5">';
+    html += '<span class="text-[10px] font-bold rounded-full px-2 py-1 bg-red-50 text-red-700 border border-red-100">' + m.type + '</span>';
+    html += '<span class="text-[10px] font-bold rounded-full px-2 py-1 bg-slate-100 text-slate-600">Historical incident</span>';
+    if (m.approximate !== false) {
+      html += '<span class="text-[10px] font-bold rounded-full px-2 py-1 bg-amber-50 text-amber-800 border border-amber-100">Approximate location</span>';
+    }
+    html += '<span class="text-[10px] font-bold rounded-full px-2 py-1 bg-violet-50 text-violet-700 border border-violet-100">Sample content</span>';
+    html += '</div>';
+    html += '<p class="text-[12px] text-slate-600 mt-3 leading-relaxed">' + m.summary + '</p>';
+    html += '<dl class="mt-3 divide-y divide-slate-100 border-t border-slate-100">';
+    var row = function (k, v) {
+      return '<div class="flex items-start justify-between gap-3 py-2"><dt class="text-[11px] text-slate-400 shrink-0">' + k + '</dt><dd class="text-[11px] font-semibold text-slate-700 text-right">' + v + '</dd></div>';
+    };
+    html += row('Location', m.location);
+    html += row('Area', m.area);
+    html += row('Incident date', m.incidentDate);
+    html += row('Published', m.publishedDate);
+    html += row('Source', m.source);
+    html += '</dl>';
+    html += '<p class="text-[10px] text-slate-400 mt-3 leading-relaxed">Markers show an approximate area, not an exact address. A historical incident is not a statement about current conditions in the area.</p>';
+    $('evBody').innerHTML = html;
+    $('evRead').setAttribute('data-inc', m.id);
+    show($('evidenceModal'), 'flex');
+  }
+
+  function openSource(id) {
+    var m = NEWS.filter(function (n) { return n.id === id; })[0];
+    if (!m) return;
+    var idx = SOURCE_INDEX[m.source];
+    var html = '';
+    html += '<p class="text-[12px] font-bold text-slate-900">' + m.title + '</p>';
+    html += '<div class="mt-2 text-[11px] text-slate-500 space-y-1">';
+    html += '<p>Publisher: <span class="font-semibold text-slate-700">' + m.source + '</span></p>';
+    html += '<p>Published: <span class="font-semibold text-slate-700">' + m.publishedDate + '</span></p>';
+    html += '<p>Incident date: <span class="font-semibold text-slate-700">' + m.incidentDate + '</span></p>';
+    html += '</div>';
+    html += '<div class="mt-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2">';
+    html += '<p class="text-[11px] font-bold text-amber-900">Sample content — article link pending verification</p>';
+    html += '<p class="text-[11px] text-amber-800 mt-1 leading-relaxed">The news retrieval connector is not configured in this build, so this item has not been matched to a verified article URL. The title, dates and summary are placeholders that must be replaced with a real, sourced report before release.</p>';
+    html += '</div>';
+    if (idx) {
+      html += '<a href="' + idx.url + '" target="_blank" rel="noopener" class="mt-3 flex items-center justify-between gap-2 border border-slate-200 rounded-xl px-3 py-2.5">';
+      html += '<span><span class="block text-[12px] font-bold text-slate-900">' + idx.label + '</span>';
+      html += '<span class="block text-[10px] text-slate-400">Official site · opens externally</span></span>';
+      html += '<iconify-icon icon="mdi:open-in-new" class="text-[16px] text-slate-400"></iconify-icon>';
+      html += '</a>';
+      html += '<p class="text-[10px] text-slate-400 mt-2 leading-relaxed">This link opens the publisher\'s index page, not the specific article, because the article URL has not been verified.</p>';
+    }
+    $('srcBody').innerHTML = html;
+    show($('sourceModal'), 'flex');
+  }
+
+  var pendingConfirm = null;
+
+  function openSos() {
+    show($('sosModal'), 'flex');
+  }
+
+  function askConfirm(kind) {
+    pendingConfirm = kind;
+    if (kind === 'police') {
+      $('cfTitle').textContent = 'Call Police / Emergency Services?';
+      $('cfBody').textContent = 'This will attempt to dial 999 (Singapore emergency line). Only continue if you need urgent help.';
+    } else {
+      $('cfTitle').textContent = 'Call ' + CONTACT.name + '?';
+      $('cfBody').textContent = 'This will attempt to dial ' + CONTACT.phone + '. They are set as your trusted contact for this prototype.';
+    }
+    hide($('sosModal'));
+    show($('confirmModal'), 'flex');
+  }
+
+  function doCall() {
+    var kind = pendingConfirm;
+    hide($('confirmModal'));
+    show($('sosModal'), 'flex');
+    if (kind === 'police') {
+      $('cfTitle').textContent = '';
+      window.alert('Prototype notice: dialling is not available in this preview. On a real device this action would open the phone dialler with 999. No call was placed.');
+    } else {
+      window.alert('Prototype notice: dialling is not available in this preview. On a real device this action would open the phone dialler with ' + CONTACT.phone + '. No call was placed.');
+    }
+    pendingConfirm = null;
+  }
+
+  /* ---------------- Events ---------------- */
+
+  function search() {
+    var a = resolvePlace($('origin').value);
+    var b = resolvePlace($('destination').value);
+    var notice = $('inputNotice');
+
+    if (!a || !b) {
+      notice.innerHTML = '<strong class="font-bold">Demo Mode — no route generated.</strong> Live place search is not connected yet. Enter one of the demo origin–destination pairs below (or tap a demo chip). Examples: Bugis MRT Station → Singapore Management University.';
+      show(notice, 'block');
+      return;
+    }
+    var hit = findDemo(a, b);
+    if (!hit) {
+      notice.innerHTML = '<strong class="font-bold">Demo Mode — no route generated.</strong> Route geometry is only available for the four listed demo trips. "' + a + '" → "' + b + '" is not one of them, so no route, time or distance is produced.';
+      show(notice, 'block');
+      return;
+    }
+    hide(notice);
+    active = hit;
+    store.demo = hit.id;
+    store.route = DEMOS[hit.id].safer ? 'safer' : 'fastest';
+    saveStore();
+    render();
+    var d = currentDemo();
+    $('origin').value = d.from;
+    $('destination').value = d.to;
+  }
+
+  function loadDemo(k) {
+    var d = DEMOS[k];
+    active = { id: k, reversed: false };
+    store.demo = k;
+    store.route = d.safer ? 'safer' : 'fastest';
+    saveStore();
+    $('origin').value = d.from;
+    $('destination').value = d.to;
+    hide($('inputNotice'));
+    render();
+  }
+
+  function bind() {
+    var list = '';
+    PLACES.forEach(function (p) { list += '<option value="' + p + '"></option>'; });
+    $('sgPlaces').innerHTML = list;
+
+    $('findBtn').addEventListener('click', search);
+    $('origin').addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
+    $('destination').addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
+
+    $('demoChips').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-demo]');
+      if (btn) loadDemo(btn.getAttribute('data-demo'));
+    });
+
+    $('mapWrap').addEventListener('click', function (e) {
+      var g = e.target.closest('[data-inc]');
+      if (g) openEvidence(g.getAttribute('data-inc'));
+    });
+
+    $('sosBtn').addEventListener('click', openSos);
+    $('sosCancel').addEventListener('click', function () { hide($('sosModal')); });
+    $('sosModal').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-sos]');
+      if (b) askConfirm(b.getAttribute('data-sos'));
+      if (e.target === $('sosModal')) hide($('sosModal'));
+    });
+    $('cfCancel').addEventListener('click', function () { hide($('confirmModal')); pendingConfirm = null; });
+    $('cfOk').addEventListener('click', doCall);
+
+    $('evClose').addEventListener('click', function () { hide($('evidenceModal')); });
+    $('evRead').addEventListener('click', function () { openSource(this.getAttribute('data-inc')); });
+    $('srcClose').addEventListener('click', function () { hide($('sourceModal')); });
+    $('evidenceModal').addEventListener('click', function (e) { if (e.target === $('evidenceModal')) hide($('evidenceModal')); });
+    $('sourceModal').addEventListener('click', function (e) { if (e.target === $('sourceModal')) hide($('sourceModal')); });
+
+    $('contactSub').textContent = CONTACT.name + ' · ' + CONTACT.phone;
+  }
+
+  bind();
+  render();
+
+  /* restore last selection so other pages stay in sync */
+  try {
+    var saved = localStorage.getItem('sfgps_demo');
+    if (saved && DEMOS[saved]) {
+      store.demo = saved;
+      store.route = localStorage.getItem('sfgps_route') || 'safer';
+      loadDemo(saved);
+    }
+  } catch (e) { /* ignore */ }
+
+})();
+</script>
+</body>
+</html>
